@@ -1,0 +1,67 @@
+{
+  "react": {
+    "name": "react",
+    "version": "19.1.0"
+  },
+  "react-native": {
+    "name": "react-native",
+    "version": "0.80.1"
+  },
+  "@react-navigation/stack": {
+    "name": "@react-navigation/stack",
+    "version": "7.4.4"
+  },
+  "@react-navigation/native": {
+    "name": "@react-navigation/native",
+    "version": "7.1.16"
+  },
+  "@module-federation/enhanced": {
+    "name": "@module-federation/enhanced",
+    "version": "0.13.1",
+    "shared": false
+  },
+  "react-native-gesture-handler": {
+    "name": "react-native-gesture-handler",
+    "version": "2.27.2"
+  },
+  "react-native-reanimated": {
+    "name": "react-native-reanimated",
+    "version": "4.0.1"
+  },
+  "react-native-safe-area-context": {
+    "name": "react-native-safe-area-context",
+    "version": "5.5.2"
+  },
+  "react-native-screens": {
+    "name": "react-native-screens",
+    "version": "4.13.1"
+  },
+  "react-native-worklets": {
+    "name": "react-native-worklets",
+    "version": "0.4.1"
+  },
+  "react-native-vector-icons": {
+    "name": "react-native-vector-icons",
+    "version": "10.3.0"
+  },
+  "@react-navigation/bottom-tabs": {
+    "name": "@react-navigation/bottom-tabs",
+    "version": "7.4.4"
+  },
+  "react-redux": {
+    "name": "react-redux",
+    "version": "9.2.0"
+  },
+  "redux-saga": {
+    "name": "redux-saga",
+    "version": "1.3.0"
+  },
+  "@reduxjs/toolkit": {
+    "name": "@reduxjs/toolkit",
+    "version": "2.8.2"
+  },
+  "axios": {
+    "name": "axios",
+    "version": "1.11.0"
+  }
+}

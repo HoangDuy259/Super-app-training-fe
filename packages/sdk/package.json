@@ -1,0 +1,17 @@
+{
+  "name": "new-demo-app-sdk",
+  "version": "0.1.8",
+  "description": "Dependency management & utils for the Super App Showcase",
+  "license": "MIT",
+  "files": [
+    "android",
+    "ios",
+    "lib",
+    "index.js",
+    "preset.js"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  }
+}
