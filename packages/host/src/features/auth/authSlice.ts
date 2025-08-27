@@ -1,6 +1,6 @@
 // src/features/auth/authSlice.ts
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { AuthState, LoginPayload, SignupPayload } from "./types";
+import type { AuthState, LoginPayload, SignupPayload, SignupResponse } from "./types";
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -37,10 +37,12 @@ const authSlice = createSlice({
     },
     signupSuccess: (state) => {
       state.loading = false;
+      state.isAuthenticated = false;
     },
     signupFailure: (state, action: PayloadAction<string>) => {
-      state.loading = false;
+      state.loading = true;
       state.error = action.payload;
+      state.isAuthenticated = false;
     },
 
     // LOGOUT

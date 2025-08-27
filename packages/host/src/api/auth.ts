@@ -1,4 +1,5 @@
 import axios from "axios";
+import { SignupPayload  } from "../features/auth/types";
 
 export const API_URL = "http://10.0.2.2:8080";
 
@@ -20,3 +21,11 @@ export const login = async (data: LoginRequest): Promise<LoginResponse> => {
   }
   return response.data;
 };
+
+export const signup = async (data: SignupPayload) => {
+  const response = await axios.post(`${API_URL}/auth/users/register`, data);
+  if(response.data){
+    throw new Error("Sigup Failed");
+  }
+  return response.data;
+}

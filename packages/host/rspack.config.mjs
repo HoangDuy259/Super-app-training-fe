@@ -44,7 +44,8 @@ export default env => {
         name: 'host',
         dts: false,
         remotes: {
-          bank: `bank@http://localhost:9000/${platform}/mf-manifest.json`,
+          // bank: `bank@http://localhost:9000/${platform}/mf-manifest.json`,
+          bank: `bank@http://10.0.2.2:9000/${platform}/mf-manifest.json`,
         },
         shared: {
           ...getSharedDependencies({ eager: true }),
