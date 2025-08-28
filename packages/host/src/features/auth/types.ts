@@ -16,6 +16,9 @@ export interface LoginPayload {
 
 // Payload cho signup
 export interface SignupPayload {
-  email: string;
-  password: string;
+  email: string,
+  userName: string,
+  password: string,
+  confirmPassword: string,
+  phoneNum: string
 }

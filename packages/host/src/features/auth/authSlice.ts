@@ -37,10 +37,12 @@ const authSlice = createSlice({
     },
     signupSuccess: (state) => {
       state.loading = false;
+      state.isAuthenticated = false;
     },
     signupFailure: (state, action: PayloadAction<string>) => {
-      state.loading = false;
+      state.loading = true;
       state.error = action.payload;
+      state.isAuthenticated = false;
     },
 
     // LOGOUT
