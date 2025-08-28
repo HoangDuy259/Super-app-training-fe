@@ -15,21 +15,10 @@ export interface LoginPayload {
 }
 
 // Payload cho signup
-// export interface SignupPayload {
-//   email: string;
-//   password: string;
-// }
-
-// type cho register request
 export interface SignupPayload {
   email: string,
   userName: string,
   password: string,
   confirmPassword: string,
   phoneNum: string
-}
-
-// type cho register response
-export interface SignupResponse {
-  message: string
 }
