@@ -1,7 +1,7 @@
 import { View, Text } from 'react-native';
 import React from 'react';
-import ErrorBoundary from '../../../Components/ErrorBoundary';
-import Placeholder from '../../../Components/Placeholder';
+import ErrorBoundary from '../../../components/ErrorBoundary';
+import Placeholder from '../../../components/Placeholder';
 
 const DetailAccount = React.lazy(
   () => import('bank/screens/DetailAccountScreen'),

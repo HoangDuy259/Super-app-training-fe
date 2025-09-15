@@ -1,56 +1,55 @@
 // src/features/auth/authSlice.ts
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import type { AuthState, LoginPayload, SignupPayload } from "./types";
+import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import type {
+  AuthReponse,
+  AuthState,
+  LoginPayload,
+  SignupPayload,
+} from './types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
-  token: null,
+  accessToken: null,
+  expiresIn: 0,
   loading: false,
-  error: null,
 };
 
 const authSlice = createSlice({
-  name: "auth",
+  name: 'auth',
   initialState,
   reducers: {
     // LOGIN
     loginRequest: (state, action: PayloadAction<LoginPayload>) => {
       state.loading = true;
-      state.error = null;
     },
-    loginSuccess: (state, action: PayloadAction<string>) => {
+    loginSuccess: (state, action: PayloadAction<AuthReponse>) => {
+      const { accessToken, expiresIn } = action.payload;
       state.isAuthenticated = true;
-      state.token = action.payload;
+      state.accessToken = accessToken;
+      state.expiresIn = Date.now() + expiresIn * 1000; // Lưu thời gian token hết hạn
       state.loading = false;
     },
-    loginFailure: (state, action: PayloadAction<string>) => {
-      state.isAuthenticated = false;
-      state.token = null;
+    loginFailure: state => {
       state.loading = false;
-      state.error = action.payload;
     },
 
     // SIGNUP
     signupRequest: (state, action: PayloadAction<SignupPayload>) => {
       state.loading = true;
-      state.error = null;
     },
-    signupSuccess: (state) => {
+    signupSuccess: state => {
       state.loading = false;
-      state.isAuthenticated = false;
     },
-    signupFailure: (state, action: PayloadAction<string>) => {
-      state.loading = true;
-      state.error = action.payload;
-      state.isAuthenticated = false;
+    signupFailure: state => {
+      state.loading = false;
     },
 
     // LOGOUT
-    logout: (state) => {
+    logout: state => {
       state.isAuthenticated = false;
-      state.token = null;
+      state.accessToken = null;
+      state.expiresIn = null;
       state.loading = false;
-      state.error = null;
     },
   },
 });

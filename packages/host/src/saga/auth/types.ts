@@ -1,11 +1,14 @@
-// src/features/auth/types.ts
-
 // State của auth
 export interface AuthState {
   isAuthenticated: boolean;
-  token: string | null;
+  accessToken: string | null;
   loading: boolean;
-  error: string | null;
+  expiresIn: number | 0;
+}
+
+export interface AuthReponse {
+  accessToken: string;
+  expiresIn: number;
 }
 
 // Payload cho login
@@ -16,9 +19,9 @@ export interface LoginPayload {
 
 // Payload cho signup
 export interface SignupPayload {
-  email: string,
-  userName: string,
-  password: string,
-  confirmPassword: string,
-  phoneNum: string
+  email: string;
+  userName: string;
+  password: string;
+  confirmPassword: string;
+  phoneNum: string;
 }

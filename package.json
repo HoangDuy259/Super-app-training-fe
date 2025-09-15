@@ -3,10 +3,18 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "android:host": "pnpm --filter host android",
+    "start:host": "pnpm --filter host start",
+    "start:bank": "pnpm --filter bank start",
+    "start:all": "concurrently \"pnpm start:host\" \"pnpm start:bank\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.13.1"
+  "packageManager": "pnpm@10.13.1",
+  "dependencies": {
+    "add": "^2.0.6",
+    "react-native-encrypted-storage": "^4.0.3"
+  }
 }

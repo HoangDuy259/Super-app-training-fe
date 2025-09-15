@@ -9,8 +9,12 @@ import {
 import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Colors from '../themes/Color';
+import store from 'host/store';
+import { useSelector } from 'react-redux';
 
 const BankScreen = ({ navigation }) => {
+  const auth = useSelector(state => state.auth);
+  console.log('Get auth state from host: ', auth);
   return (
     <SafeAreaView style={styles.safeContainer}>
       <ScrollView style={styles.container}>

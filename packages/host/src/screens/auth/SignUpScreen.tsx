@@ -8,11 +8,11 @@ import {
 } from 'react-native';
 import React, { useContext, useState } from 'react';
 import { RootStackParamsList } from '../../navigation/RootNavigation';
-import { AuthContext } from '../../features/auth/AuthContext';
+import { AuthContext } from '../../saga/auth/AuthContext';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { SignupPayload } from '../../features/auth/types';
+import { SignupPayload } from '../../saga/auth/types';
 import { useSelector } from 'react-redux';
-import { RootState } from '../../app/store';
+import { RootState } from '../../store/store';
 
 type SignUpScreenNavigationProp = StackNavigationProp<
   RootStackParamsList,
@@ -38,7 +38,7 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
       Alert.alert('Lỗi!', 'Vui lòng điền đầy đủ thông tin');
       return;
     }
-    
+
     if (password !== confirmPassword) {
       Alert.alert('Lỗi!', 'Xác nhận mật khẩu chưa khớp');
       return;

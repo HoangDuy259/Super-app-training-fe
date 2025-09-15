@@ -8,9 +8,9 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import RootNavigation from './src/navigation/RootNavigation';
-import { AuthProvider } from './src/features/auth/AuthContext';
+import { AuthProvider } from './src/saga/auth/AuthContext';
 import { Provider } from 'react-redux';
-import { store } from './src/app/store';
+import { store } from './src/store/store';
 
 function App() {
   return (

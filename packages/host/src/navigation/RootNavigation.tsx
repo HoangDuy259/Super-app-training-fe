@@ -1,15 +1,13 @@
-import { View, Text } from 'react-native';
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
 import {
   createStackNavigator,
   StackNavigationProp,
 } from '@react-navigation/stack';
 import MainNavigation from './MainNavigation';
-import BankScreen from '../screens/bank/BankScreen';
-import { useNavigation } from '@react-navigation/native';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
-import { AuthContext } from '../features/auth/AuthContext';
+import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../saga/auth/AuthContext';
 
 export type RootStackParamsList = {
   Login: undefined;
@@ -22,7 +20,17 @@ type NavigationProps = StackNavigationProp<RootStackParamsList>;
 
 const RootNavigation = () => {
   const navigation = useNavigation<NavigationProps>();
-  const { isAuthenticated, isLoading } = useContext(AuthContext);
+
+  const { isAuthenticated } = useContext(AuthContext);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      console.log('User not authenticated, navigating to login screen');
+
+      navigation.navigate('Login');
+    }
+  }, [isAuthenticated]);
+
   return (
     <Stack.Navigator initialRouteName="Login">
       <Stack.Screen

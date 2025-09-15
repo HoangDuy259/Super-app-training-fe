@@ -74,6 +74,9 @@ export default env => {
               './screens/TransferNumberAccountScreen':
                 './src/screens/transfer/TransferNumberAccountScreen',
             },
+        remotes: {
+          host: `host@http://localhost:8081/${platform}/mf-manifest.json`,
+        },
         shared: {
           ...getSharedDependencies({ eager: true }),
           '@react-navigation/native': {

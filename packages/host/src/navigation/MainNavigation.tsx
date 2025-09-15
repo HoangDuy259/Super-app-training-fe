@@ -1,16 +1,26 @@
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import BankScreen from '../screens/bank/BankScreen';
 import AccountScreen from '../screens/AccountScreen';
 import StockScreen from '../screens/StockScreen';
 import BankNavigation from './BankNavigation';
+import { useNavigation } from '@react-navigation/native';
+import { AuthContext } from '../saga/auth/AuthContext';
+import { login } from '../api/auth';
+
+export type MainTabParamsList = {
+  Home: undefined;
+  Stock: undefined;
+  Porfolio: undefined;
+  Account: undefined;
+};
 
 const Tab = createBottomTabNavigator();
-
-// const Basic = React.lazy(() => import('bank/Basic'));
+type NavigationProps = TabNavigationProp<MainTabParamsList>;
 
 const MainNavigation = () => {
-  console.log('MainNavigation');
+  const navigation = useNavigation<NavigationProps>();
+
   return (
     <Tab.Navigator>
       <Tab.Screen

@@ -1,33 +1,43 @@
-import { Alert, View, Text, StyleSheet, TextInput, TouchableOpacity, Alert } from "react-native";
-import React, { useContext, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { StackNavigationProp } from "@react-navigation/stack";
-import { RootStackParamsList } from "../../navigation/RootNavigation";
-import { AuthContext } from "../../features/auth/AuthContext";
-import type { RootState, AppDispatch } from "../../app/store";
+import {
+  Alert,
+  View,
+  Text,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+} from 'react-native';
+import React, { useContext, useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { RootStackParamsList } from '../../navigation/RootNavigation';
+import { AuthContext } from '../../saga/auth/AuthContext';
+import type { RootState, AppDispatch } from '../../store/store';
 
-type LoginScreenNavigationProp = StackNavigationProp<RootStackParamsList, "Login">;
+type LoginScreenNavigationProp = StackNavigationProp<
+  RootStackParamsList,
+  'Login'
+>;
 
 interface LoginScreenProps {
   navigation: LoginScreenNavigationProp;
 }
 
 const LoginScreen = ({ navigation }: LoginScreenProps) => {
-  const { loading, isAuthenticated } = useSelector((state: RootState) => state.auth);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const { logIn } = useContext(AuthContext);
-  console.log(logIn);
   const handleLogin = () => {
     if (email && password) {
-      logIn(email, password);
+      logIn({ email, password });
     }
   };
 
   useEffect(() => {
     if (isAuthenticated) {
-      Alert.alert("Đăng nhập thành công", `Xin chào`);
-      navigation.navigate("Home");
+      Alert.alert('Đăng nhập thành công', `Xin chào`);
+      navigation.navigate('Home');
     }
   }, [isAuthenticated]);
 
@@ -52,7 +62,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
-      <TouchableOpacity onPress={() => navigation.navigate("SignUp")}>
+      <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
         <Text style={styles.linkText}>You don't have an account? Sign Up.</Text>
       </TouchableOpacity>
     </View>
@@ -62,40 +72,40 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
     padding: 16,
   },
   headerText: {
     fontSize: 24,
-    fontWeight: "bold",
+    fontWeight: 'bold',
     marginBottom: 20,
   },
   input: {
-    width: "100%",
+    width: '100%',
     height: 40,
     borderRadius: 6,
-    borderColor: "#cccccc",
+    borderColor: '#cccccc',
     borderWidth: 1,
     paddingHorizontal: 10,
     marginBottom: 10,
   },
   button: {
-    width: "100%",
+    width: '100%',
     height: 40,
-    backgroundColor: "#056edd",
-    justifyContent: "center",
-    alignItems: "center",
+    backgroundColor: '#056edd',
+    justifyContent: 'center',
+    alignItems: 'center',
     borderRadius: 6,
     marginTop: 10,
   },
   buttonText: {
-    color: "#ffffff",
+    color: '#ffffff',
     fontSize: 16,
-    fontWeight: "bold",
+    fontWeight: 'bold',
   },
   linkText: {
-    color: "#056edd",
+    color: '#056edd',
     marginTop: 10,
     fontSize: 16,
   },
