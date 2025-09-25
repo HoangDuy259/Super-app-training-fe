@@ -36,6 +36,23 @@ export default env => {
       rules: [
         ...Repack.getJsTransformRules(),
         ...Repack.getAssetTransformRules(),
+        {
+          test: /\.css$/,
+          use: [
+            "style-loader",
+            {
+              loader: "css-loader",
+              options: { importLoaders: 1 },
+            },
+            "postcss-loader",
+          ],
+          include: [
+            path.resolve(__dirname, "src"),
+            path.resolve(__dirname, "global.css"), // để chắc chắn
+            path.resolve(__dirname, "../sdk"),
+            path.resolve(__dirname, "../bank"),
+          ],
+        },
       ],
     },
     plugins: [
@@ -45,7 +62,7 @@ export default env => {
         filename: 'host.container.js.bundle',
         dts: false,
         remotes: {
-          bank: `bank@http://localhost:9000/${platform}/mf-manifest.json`,
+          bank: `bank@http://10.0.2.2:9000/${platform}/mf-manifest.json`,
         },
         exposes: {
           './store': './src/store/store',

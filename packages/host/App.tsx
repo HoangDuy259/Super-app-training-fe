@@ -11,6 +11,7 @@ import RootNavigation from './src/navigation/RootNavigation';
 import { AuthProvider } from './src/saga/auth/AuthContext';
 import { Provider } from 'react-redux';
 import { store } from './src/store/store';
+import "./global.css";
 
 function App() {
   return (
