@@ -91,12 +91,12 @@ const BankNavigation = () => {
         name="Bank"
         component={BankScreen}
         options={{
-          header: ({ navigation }) => (
-            <HeaderTab handleRightBtn={() => {}} rightBtnIcon="bell">
-              Trang chủ
-            </HeaderTab>
-          ),
-          headerShown: true,
+        //   header: ({ navigation }) => (
+        //     <HeaderTab handleRightBtn={() => {}} rightBtnIcon="bell">
+        //       Trang chủ
+        //     </HeaderTab>
+        //   ),
+          headerShown: false,
         }}
       />
       <Stack.Screen

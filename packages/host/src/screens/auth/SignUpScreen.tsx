@@ -13,6 +13,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { SignupPayload } from '../../saga/auth/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../../store/store';
+import Color from '../../themes/Color';
 
 type SignUpScreenNavigationProp = StackNavigationProp<
   RootStackParamsList,
@@ -26,21 +27,16 @@ interface SignUpScreenProps {
 const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
-  // const [firstName, setFirstName] = useState("");
-  // const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [phoneNum, setPhoneNum] = useState('');
   const { signUp } = useContext(AuthContext);
+    const [focusedInput, setFocusedInput] = useState<string | null>(null);
+
 
   const handleSignUp = async () => {
-    if (!email || !username || !phoneNum || !password || !confirmPassword) {
+    if (!email || !username || !password) {
       Alert.alert('Lỗi!', 'Vui lòng điền đầy đủ thông tin');
-      return;
-    }
-
-    if (password !== confirmPassword) {
-      Alert.alert('Lỗi!', 'Xác nhận mật khẩu chưa khớp');
       return;
     }
 
@@ -48,8 +44,6 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
       email: email,
       userName: username,
       password: password,
-      confirmPassword: confirmPassword,
-      phoneNum: phoneNum,
     };
 
     try {
@@ -62,64 +56,61 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
   };
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Sign Up</Text>
+      <Text style={styles.headerText}>Đăng ký tài khoản</Text>
       <TextInput
-        placeholder="Username"
+        placeholder="Tên đăng nhập"
         keyboardType="default"
         autoCapitalize="none"
-        style={styles.input}
+        style={[styles.input, focusedInput === 'username' && styles.focusedInput]}
         value={username}
         onChangeText={setUsername}
+        onFocus={() => setFocusedInput('username')}
+        onBlur={() => setFocusedInput(null)}
       />
       <TextInput
         placeholder="Email"
         keyboardType="email-address"
         autoCapitalize="none"
-        style={styles.input}
+        style={[styles.input, focusedInput === 'email' && styles.focusedInput]}
         value={email}
         onChangeText={setEmail}
-      />
-      {/* <TextInput
-        placeholder="First Name"
-        keyboardType="default"
-        autoCapitalize="none"
-        style={styles.input}
-        value={firstName}
-        onChangeText={setFirstName}
+        onFocus={() => setFocusedInput('email')}
+        onBlur={() => setFocusedInput(null)}
       />
       <TextInput
-        placeholder="Last Name"
+        placeholder="Họ"
         keyboardType="default"
         autoCapitalize="none"
-        style={styles.input}
+        style={[styles.input, focusedInput === 'lastname' && styles.focusedInput]}
         value={lastName}
         onChangeText={setLastName}
-      /> */}
+        onFocus={() => setFocusedInput('lastname')}
+        onBlur={() => setFocusedInput(null)}
+      />
       <TextInput
-        value={phoneNum}
-        onChangeText={setPhoneNum}
-        style={styles.input}
-        placeholder="Phone Number"
+        placeholder="Tên"
+        keyboardType="default"
+        autoCapitalize="none"
+        style={[styles.input, focusedInput === 'firstname' && styles.focusedInput]}
+        value={firstName}
+        onChangeText={setFirstName}
+        onFocus={() => setFocusedInput('firstname')}
+        onBlur={() => setFocusedInput(null)}
       />
       <TextInput
         value={password}
         onChangeText={setPassword}
-        style={styles.input}
-        placeholder="Password"
+        style={[styles.input, focusedInput === 'password' && styles.focusedInput]}
+        placeholder="Mật khẩu"
         secureTextEntry
-      />
-      <TextInput
-        value={confirmPassword}
-        onChangeText={setConfirmPassword}
-        style={styles.input}
-        placeholder="Confirm Password"
-        secureTextEntry
+        onFocus={() => setFocusedInput('password')}
+        onBlur={() => setFocusedInput(null)}
       />
       <TouchableOpacity onPress={handleSignUp} style={styles.button}>
-        <Text style={styles.buttonText}>Sign Up</Text>
+        <Text style={styles.buttonText}>Đăng ký</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.linkText}>Alreay have an account? Log In </Text>
+        <Text style={styles.linkText}>Bạn đã có tài khoản chưa? Đăng nhập. </Text>
       </TouchableOpacity>
     </View>
   );
@@ -136,6 +127,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: Color.highlightText
   },
   input: {
     width: '100%',
@@ -146,10 +138,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
+  focusedInput: {
+    borderColor: Color.boldBg,
+  },
   button: {
     width: '100%',
     height: 40,
-    backgroundColor: '#056edd',
+    backgroundColor: Color.boldBg,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 6,
@@ -161,7 +156,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   linkText: {
-    color: '#056edd',
+    color: Color.highlightText,
     marginTop: 10,
     fontSize: 16,
   },
