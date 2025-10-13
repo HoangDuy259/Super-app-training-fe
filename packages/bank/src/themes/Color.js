@@ -1,15 +1,17 @@
 const Color = {
-  background: '#FFFF',
-  blue: '#2445EF',
-  white: '#FFFFFF',
-  gray: '#888',
-  green: '#23B371',
   primary: '#2445EF',
-  primaryLight: '#EDEFF8',
-  background: '#f2f2f2',
   success: '#4CAF50',
   warning: '#FFC107',
   danger: '#F44336',
-  black: '#000000',
+
+  lightBg: '#9500ffff',
+  boldBg: '#7c00d4ff',
+  btnBg: '#e0e0e0b2',
+  primaryText: '#212121',
+  whiteText: '#f2f2f2',
+  subText: '#666',
+  secondBg: '#ff9900ff',
+  highlightText: '#9500ffff'
 };
+
 export default Color;

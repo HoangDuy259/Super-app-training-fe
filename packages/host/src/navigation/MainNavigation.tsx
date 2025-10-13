@@ -1,12 +1,10 @@
-import React, { useContext, useEffect } from 'react';
+import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import BankScreen from '../screens/bank/BankScreen';
 import AccountScreen from '../screens/AccountScreen';
 import StockScreen from '../screens/StockScreen';
-import BankNavigation from './BankNavigation';
+import BankNavigation from '../../../bank/src/navigation/BankNavigation';
 import { useNavigation } from '@react-navigation/native';
-import { AuthContext } from '../saga/auth/AuthContext';
-import { login } from '../api/auth';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 
 export type MainTabParamsList = {
