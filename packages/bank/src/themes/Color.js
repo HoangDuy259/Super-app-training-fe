@@ -5,6 +5,7 @@ const Color = {
   danger: '#F44336',
 
   lightBg: '#9500ffff',
+  opacityBg: '#cc88fd20',
   boldBg: '#7c00d4ff',
   btnBg: '#e0e0e0b2',
   primaryText: '#212121',

@@ -63,16 +63,18 @@ export default env => {
         exposes: STANDALONE
           ? undefined
           : {
+            // định nghĩa các màn hình remote ở đây
+              // home 
               './screens/BankScreen': './src/screens/BankScreen',
-              //Account
+              // account
               './screens/AccountScreen': './src/screens/account/AccountScreen',
-              './screens/DetailAccountScreen':
-                './src/screens/account/DetailAccountScreen',
-              //Transfer
-              './screens/TransferScreen':
-                './src/screens/transfer/TransferScreen',
-              './screens/TransferNumberAccountScreen':
-                './src/screens/transfer/TransferNumberAccountScreen',
+              // transfer
+              './screens/ChooseBankScreen': './src/screens/transfer/ChooseBankScreen',
+              './screens/FindDestinationAccountScreen': './src/screens/transfer/FindDestinationAccountScreen',
+              './screens/InputAmountScreen': './src/screens/transfer/InputAmountScreen',
+              './screens/ConfirmCodeScreen': './src/screens/transfer/ConfirmCodeScreen',
+              './screens/TransactionStatusScreen': './src/screens/transfer/ChooseBankScreen',
+              
             },
         remotes: {
           host: `host@http://localhost:8081/${platform}/mf-manifest.json`,

@@ -11,14 +11,12 @@ import {
 import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../themes/Color';
-import { useSelector } from 'react-redux';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { RootStackParamsList } from '../../../host/src/navigation/RootNavigation';
-
+import { BankStackParamsList } from '../navigation/bank.types';
 
 type BankScreenNavigationProp = StackNavigationProp<
-  
-  
+  BankStackParamsList,
+  'Bank'
 >;
 
 interface BankScreenProps {
@@ -26,15 +24,7 @@ interface BankScreenProps {
 }
 
 const BankScreen = ({ navigation }: BankScreenProps) => {
-  // const auth = useSelector(state => state.auth);
-  // console.log('Get auth state from host: ', auth);
   const { width } = Dimensions.get('window');
-
-  // navigate sang màn hình chuyển khoản
-  const navigateTransferScreen = () => {
-      navigation.navigate('Home');
-
-  }
 
   return (
     <SafeAreaView style={styles.safeContainer}>
@@ -107,9 +97,9 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               <TouchableOpacity
                 style={styles.buttonController}
                 activeOpacity={0.7}
-                onPress={() => console.log('TouchableOpacity pressed')}
+                onPress={() => navigation.navigate('TransferFlow', {fromAccountId: 'ABC'})}
               >
-                <View style={styles.buttonControllerIcon}>
+                <View style={styles.buttonControllerIcon} >
                   <Icon name="right-left" size={32} color={Color.whiteText} />
                 </View>
                 <Text style={styles.textController}>Chuyển tiền</Text>
@@ -152,7 +142,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
           </View>
           {/* Section static layout */}
           <View style={styles.serviceContainer}>
-            <View style={{height: 100}}></View>
+            <View style={{ height: 100 }}></View>
           </View>
         </View>
       </ScrollView>
@@ -192,18 +182,18 @@ const styles = StyleSheet.create({
   contentContainer: {
     flexDirection: 'column',
     flex: 1,
-    height: '100%'
+    height: '100%',
   },
 
   bankAccountListWrapper: {
     padding: 8,
     flexDirection: 'column',
     justifyContent: 'space-between',
-    backgroundColor: Color.lightBg
+    backgroundColor: Color.lightBg,
   },
 
   bankAccountList: {
-    paddingVertical: 12
+    paddingVertical: 12,
   },
 
   bankAccountItem: {
@@ -214,7 +204,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     paddingTop: 20,
-    paddingBottom: 35
+    paddingBottom: 35,
   },
 
   buttonController: {
