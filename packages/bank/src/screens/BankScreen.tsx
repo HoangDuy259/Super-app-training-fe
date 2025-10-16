@@ -5,48 +5,145 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
+  Image,
+  Dimensions,
 } from 'react-native';
 import React from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-import Colors from '../themes/Color';
-import store from 'host/store';
-import { useSelector } from 'react-redux';
+import Color from '../themes/Color';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { BankStackParamsList } from '../navigation/bank.types';
 
-const BankScreen = ({ navigation }) => {
-  const auth = useSelector(state => state.auth);
-  console.log('Get auth state from host: ', auth);
+type BankScreenNavigationProp = StackNavigationProp<
+  BankStackParamsList,
+  'Bank'
+>;
+
+interface BankScreenProps {
+  navigation: BankScreenNavigationProp;
+}
+
+const BankScreen = ({ navigation }: BankScreenProps) => {
+  const { width } = Dimensions.get('window');
+
   return (
     <SafeAreaView style={styles.safeContainer}>
+      {/* wrapper */}
       <ScrollView style={styles.container}>
-        <TouchableOpacity
-          style={styles.balanceBox}
-          onPress={() => navigation.navigate('Account')}
-        >
-          <View
-            style={{ flexDirection: 'row', justifyContent: 'space-between' }}
-          >
-            <Text style={styles.balanceLabel}>Tổng số dư VND</Text>
-            <Icon style={styles.balanceIcon} name="chevron-right" size={20} />
-          </View>
-          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text style={styles.balanceValue}>50,540</Text>
-            <Text style={styles.balanceCurrency}>Vnd</Text>
-          </View>
-        </TouchableOpacity>
+        {/* header */}
+        <View style={styles.headerInfoWrapper}>
+          <View style={styles.headerInfoUser}>
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 25,
+                backgroundColor: '#fff',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: 10,
+              }}
+            >
+              <Icon name="user" size={24} color={Color.lightBg} />
+            </View>
 
-        <View style={styles.actionContainer}>
-          <TouchableOpacity
-            style={styles.actionBox}
-            onPress={() => navigation.navigate('Transfer')}
-          >
-            <Icon style={styles.transferIcon} name="money-bill" size={25} />
-            <Text style={styles.actionText}>Chuyển tiền</Text>
-          </TouchableOpacity>
+            <View style={{ flexDirection: 'column' }}>
+              <Text style={{ marginRight: 12, color: Color.whiteText }}>
+                Xin chào
+              </Text>
+              <Text
+                style={{
+                  color: Color.whiteText,
+                  fontWeight: 700,
+                  textTransform: 'uppercase',
+                  flex: 1,
+                }}
+              >
+                Tên người dùng
+              </Text>
+            </View>
+          </View>
+          <View style={styles.headerInfoNoti}>
+            <Icon name="bell" size={24} color="#fff" />
+          </View>
+        </View>
 
-          <TouchableOpacity style={styles.actionBox}>
-            <Icon style={styles.withdrawIcon} name="credit-card" size={25} />
-            <Text style={styles.actionText}>Rút tiền</Text>
-          </TouchableOpacity>
+        {/* content  */}
+        <View style={styles.contentContainer}>
+          {/* Section controller */}
+          <View style={styles.bankAccountListWrapper}>
+            <ScrollView
+              style={styles.bankAccountList}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+            >
+              <View style={[styles.bankAccountItem, { width }]}>
+                <Text style={{ color: Color.whiteText, fontWeight: 700 }}>
+                  200339798386
+                </Text>
+                <Text style={{ color: Color.whiteText, fontSize: 20 }}>
+                  200,000,000 VND
+                </Text>
+              </View>
+              <View style={[styles.bankAccountItem, { width }]}>
+                <Text style={{ color: Color.whiteText }}>19038668686</Text>
+                <Text style={{ color: Color.whiteText, fontSize: 24 }}>
+                  7,000,0000,000 VND
+                </Text>
+              </View>
+            </ScrollView>
+            <View style={styles.bankAccountItemController}>
+              <TouchableOpacity
+                style={styles.buttonController}
+                activeOpacity={0.7}
+                onPress={() => navigation.navigate('TransferFlow', {fromAccountId: 'ABC'})}
+              >
+                <View style={styles.buttonControllerIcon} >
+                  <Icon name="right-left" size={32} color={Color.whiteText} />
+                </View>
+                <Text style={styles.textController}>Chuyển tiền</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.buttonController}
+                activeOpacity={0.7}
+                onPress={() => console.log('TouchableOpacity pressed')}
+              >
+                <View style={styles.buttonControllerIcon}>
+                  <Icon
+                    name="clock-rotate-left"
+                    size={32}
+                    color={Color.whiteText}
+                  />
+                </View>
+                <Text style={styles.textController}>Lịch sử</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.buttonController}
+                activeOpacity={0.7}
+                onPress={() => console.log('TouchableOpacity pressed')}
+              >
+                <View style={styles.buttonControllerIcon}>
+                  <Icon name="qrcode" size={32} color={Color.whiteText} />
+                </View>
+                <Text style={styles.textController}>QR của tôi</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.buttonController}
+                activeOpacity={0.7}
+                onPress={() => console.log('TouchableOpacity pressed')}
+              >
+                <View style={styles.buttonControllerIcon}>
+                  <Icon name="info" size={32} color={Color.whiteText} />
+                </View>
+                <Text style={styles.textController}>Thông tin</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+          {/* Section static layout */}
+          <View style={styles.serviceContainer}>
+            <View style={{ height: 100 }}></View>
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
@@ -56,87 +153,83 @@ const BankScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   safeContainer: {
     flex: 1,
-    backgroundColor: Colors.white,
+    flexDirection: 'column',
   },
+
   container: {
-    padding: 20,
-    backgroundColor: '#fff',
-  },
-
-  balanceBox: {
-    backgroundColor: '#0047FF',
-    borderRadius: 10,
-    padding: 15,
-    marginBottom: 30,
-  },
-
-  balanceLabel: {
-    color: '#fff',
-    fontSize: 16,
-  },
-
-  balanceValue: {
-    color: '#fff',
-    fontWeight: 'bold',
-    fontSize: 30,
-    marginTop: 5,
-  },
-
-  balanceCurrency: {
-    color: '#fff',
-    fontSize: 16,
-    marginTop: 15,
-    marginLeft: 5,
-  },
-
-  balanceIcon: {
-    width: 24,
-    height: 24,
-    color: Colors.white,
-    resizeMode: 'contain',
-  },
-
-  actionContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
-  actionBox: {
     flex: 1,
-    backgroundColor: '#fff',
-    borderColor: '#0047FF',
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 20,
-    marginHorizontal: 5,
+    paddingTop: 30,
+  },
+
+  // header css
+  headerInfoWrapper: {
+    justifyContent: 'space-between',
     alignItems: 'center',
+    backgroundColor: Color.boldBg,
     flexDirection: 'row',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4, // cho Android
+    padding: 8,
   },
 
-  actionText: {
-    color: '#0047FF',
-    fontWeight: '500',
-    fontSize: 16,
-    marginLeft: 10,
+  headerInfoUser: {
+    flexDirection: 'row',
+    alignContent: 'center',
+    flex: 1,
   },
 
-  transferIcon: {
-    left: 15,
-    color: '#0047FF',
-    marginRight: 20,
-    resizeMode: 'contain',
+  headerInfoNoti: {},
+
+  // content css
+  contentContainer: {
+    flexDirection: 'column',
+    flex: 1,
+    height: '100%',
   },
 
-  withdrawIcon: {
-    left: 15,
-    color: '#0047FF',
-    marginRight: 35,
-    resizeMode: 'contain',
+  bankAccountListWrapper: {
+    padding: 8,
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    backgroundColor: Color.lightBg,
+  },
+
+  bankAccountList: {
+    paddingVertical: 12,
+  },
+
+  bankAccountItem: {
+    paddingLeft: 8,
+  },
+
+  bankAccountItemController: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    paddingTop: 20,
+    paddingBottom: 35,
+  },
+
+  buttonController: {
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+  },
+
+  buttonControllerIcon: {
+    backgroundColor: Color.btnBg,
+    borderRadius: 100,
+    width: 50,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 12,
+  },
+
+  textController: {
+    color: Color.whiteText,
+    fontSize: 12,
+  },
+
+  serviceContainer: {
+    backgroundColor: Color.danger,
   },
 });
 

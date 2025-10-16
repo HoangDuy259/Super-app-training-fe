@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import MainStackNavigation from './src/navigation/MainStackNavigation';
+import BankNavigation from './src/navigation/BankNavigation';
 import { NavigationContainer } from '@react-navigation/native';
 
 function App() {
   return (
     <NavigationContainer>
-      <MainStackNavigation />
+      <BankNavigation />
     </NavigationContainer>
   );
 }

@@ -1,5 +1,4 @@
 import {
-  Alert,
   View,
   Text,
   StyleSheet,
@@ -13,6 +12,7 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamsList } from '../../navigation/RootNavigation';
 import { AuthContext } from '../../saga/auth/AuthContext';
 import type { RootState, AppDispatch } from '../../store/store';
+import Color from './../../themes/Color';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamsList,
@@ -27,6 +27,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
   const { isAuthenticated } = useSelector((state: RootState) => state.auth);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
   const { logIn } = useContext(AuthContext);
   const handleLogin = () => {
     if (email && password) {
@@ -43,27 +44,31 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.headerText}>Log In</Text>
+      <Text style={styles.headerText}>Đăng nhập</Text>
       <TextInput
         placeholder="Email"
         keyboardType="default"
         autoCapitalize="none"
-        style={styles.input}
+        style={[styles.input, focusedInput === 'email' && styles.focusedInput]}
         value={email}
         onChangeText={setEmail}
+        onFocus={() => setFocusedInput('email')}
+        onBlur={() => setFocusedInput(null)}
       />
       <TextInput
         value={password}
         onChangeText={setPassword}
-        style={styles.input}
-        placeholder="Password"
+        style={[styles.input, focusedInput === 'password' && styles.focusedInput]}
+        placeholder="Mật khẩu"
         secureTextEntry
+        onFocus={() => setFocusedInput('password')}
+        onBlur={() => setFocusedInput(null)}
       />
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
-        <Text style={styles.buttonText}>Log In</Text>
+        <Text style={styles.buttonText}>Đăng nhập</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('SignUp')}>
-        <Text style={styles.linkText}>You don't have an account? Sign Up.</Text>
+        <Text style={styles.linkText}>Bạn chưa có tài khoản? Đăng ký.</Text>
       </TouchableOpacity>
     </View>
   );
@@ -75,11 +80,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
+    backgroundColor: Color.modalBg,
   },
   headerText: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
+    color: Color.highlightText,
   },
   input: {
     width: '100%',
@@ -90,10 +97,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 10,
   },
+  focusedInput: {
+    borderColor: Color.boldBg,
+  },
   button: {
     width: '100%',
     height: 40,
-    backgroundColor: '#056edd',
+    backgroundColor: Color.boldBg,
     justifyContent: 'center',
     alignItems: 'center',
     borderRadius: 6,
@@ -105,7 +115,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   linkText: {
-    color: '#056edd',
+    color: Color.highlightText,
     marginTop: 10,
     fontSize: 16,
   },

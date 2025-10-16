@@ -18,7 +18,6 @@ import {
   logout,
 } from './authSlice';
 import { login, signup } from '../../api/auth';
-import { getRefreshToken, saveRefreshToken } from './storage';
 import { RootState } from '../../store/store';
 import { Alert } from 'react-native';
 
@@ -30,7 +29,7 @@ function* handleLogin(action: ReturnType<typeof loginRequest>) {
   try {
     const response = yield call(login, action.payload);
     // yield call(saveRefreshToken, response.refreshToken);
-    console.log('Login successful, response:', response);
+    // console.log('Login successful, response:', response);
     console.log('Expire in:', Date.now() + response.expiresIn * 1000);
     console.log('now: ', Date.now());
     console.log(
