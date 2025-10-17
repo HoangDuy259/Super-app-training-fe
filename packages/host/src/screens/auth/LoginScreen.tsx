@@ -38,7 +38,7 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
   useEffect(() => {
     if (isAuthenticated) {
       Alert.alert('Đăng nhập thành công', `Xin chào`);
-      navigation.navigate('Home');
+      navigation.navigate('Main');
     }
   }, [isAuthenticated]);
 

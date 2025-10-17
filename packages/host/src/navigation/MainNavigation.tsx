@@ -1,30 +1,26 @@
 import React from 'react';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import BankScreen from '../screens/bank/BankScreen';
-import AccountScreen from '../screens/AccountScreen';
-import StockScreen from '../screens/StockScreen';
-import BankNavigation from '../../../bank/src/navigation/BankNavigation';
-import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+import BankNavigation from '../../../bank/src/navigation/BankNavigation';
+import StockScreen from '../screens/StockScreen';
+import AccountScreen from '../screens/AccountScreen';
 
 export type MainTabParamsList = {
   Home: undefined;
   Stock: undefined;
-  Porfolio: undefined;
+  Portfolio: undefined;
   Account: undefined;
 };
 
-const Tab = createBottomTabNavigator();
-type NavigationProps = TabNavigationProp<MainTabParamsList>;
+const Tab = createBottomTabNavigator<MainTabParamsList>();
 
 const MainNavigation = () => {
-  const navigation = useNavigation<NavigationProps>();
-
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#9500ffff', // Màu khi tab được focus
-        tabBarInactiveTintColor: '#666', // Màu khi tab không focus
+        headerShown: false,
+        tabBarActiveTintColor: '#9500ff',
+        tabBarInactiveTintColor: '#666',
       }}
     >
       <Tab.Screen
@@ -32,32 +28,27 @@ const MainNavigation = () => {
         component={BankNavigation}
         options={{
           tabBarLabel: 'Trang chủ',
-          headerShown: false,
           tabBarIcon: ({ focused }) => (
-            <Icon
-              name="house"
-              size={16}
-              color={focused ? '#ff9900ff' : '#666'}
-            />
+            <Icon name="house" size={16} color={focused ? '#ff9900' : '#666'} />
           ),
         }}
       />
       <Tab.Screen
         name="Stock"
-        component={BankScreen}
+        component={StockScreen}
         options={{
           tabBarLabel: 'Chứng khoán',
           tabBarIcon: ({ focused }) => (
             <Icon
               name="chart-line"
               size={16}
-              color={focused ? '#ff9900ff' : '#666'}
+              color={focused ? '#ff9900' : '#666'}
             />
           ),
         }}
       />
       <Tab.Screen
-        name="Porfolio"
+        name="Portfolio"
         component={AccountScreen}
         options={{
           tabBarLabel: 'Danh mục',
@@ -65,21 +56,21 @@ const MainNavigation = () => {
             <Icon
               name="bookmark"
               size={16}
-              color={focused ? '#ff9900ff' : '#666'}
+              color={focused ? '#ff9900' : '#666'}
             />
           ),
         }}
       />
       <Tab.Screen
         name="Account"
-        component={StockScreen}
+        component={AccountScreen}
         options={{
           tabBarLabel: 'Tài khoản',
           tabBarIcon: ({ focused }) => (
             <Icon
               name="user"
               size={16}
-              color={focused ? '#ff9900ff' : '#666'}
+              color={focused ? '#ff9900' : '#666'}
             />
           ),
         }}

@@ -11,6 +11,8 @@ import {
 } from 'react-native';
 import Color from '../../themes/Color';
 import Icon from 'react-native-vector-icons/FontAwesome6';
+import { StackNavigationProp } from '@react-navigation/stack';
+import { TransferStackParamsList } from '../../navigation/bank.types';
 
 interface ChooseAccountModalProps {
   visible: boolean;
@@ -24,24 +26,29 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
     overlay: {
       flex: 1,
       justifyContent: 'flex-end',
-      backgroundColor: 'rgba(178, 178, 178, 0.3))',
+      backgroundColor: 'rgba(34, 34, 34, 0.8))',
     },
-    bottomSheet: {
-      height: '50%', // 👈 nửa màn hình
-      backgroundColor: 'white',
-      borderTopLeftRadius: 16,
-      borderTopRightRadius: 16,
-      padding: 20,
-    },
-    title: { fontSize: 18, fontWeight: '600' },
+    title: { fontSize: 18, fontWeight: '600', textAlign: 'center', flex: 1 },
     close: { color: 'blue', textAlign: 'center', marginTop: 12 },
-    accountItem: { paddingVertical: 10 },
+    accountItem: {
+      paddingVertical: 10,
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      borderBottomWidth: 0.5,
+      borderColor: Color.lightLine,
+    },
     modal: {
-    backgroundColor: 'white',
-    marginHorizontal: 20,
-    borderRadius: 12,
-    padding: 20,
-  },
+      backgroundColor: Color.whiteText,
+      borderRadius: 12,
+    },
+    header: {
+      position: 'relative',
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 20,
+      borderBottomWidth: 0.5,
+      borderColor: Color.boldLine
+    },
   });
   return (
     <Modal
@@ -52,28 +59,49 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.modal}>
-          <Text style={styles.title}>Chọn tài khoản nguồn</Text>
-
-          <TouchableOpacity
-            style={styles.accountItem}
-            onPress={() => {
-              console.log('Chọn tài khoản 191289341');
-              setVisible(false);
-            }}
-          >
-            <Text>191289341 - Tài khoản thanh toán</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity onPress={() => setVisible(false)}>
-            <Text style={styles.close}>Đóng</Text>
-          </TouchableOpacity>
+          <View style={styles.header}>
+            <Text style={styles.title}>Chọn tài khoản nguồn</Text>
+            <TouchableOpacity onPress={() => setVisible(false)}>
+              <Icon name="xmark" size={24} />
+            </TouchableOpacity>
+          </View>
+          <View style={{padding: 20}}>
+            {Array.from({ length: 4 }).map((_, i) => (
+              <TouchableOpacity
+                key={i}
+                style={styles.accountItem}
+                onPress={() => {
+                  console.log('Chọn tài khoản 191289341');
+                  setVisible(false);
+                }}
+              >
+                <View>
+                  <Text style={{ fontSize: 14, marginBottom: 4 }}>
+                    191289341
+                  </Text>
+                  <Text style={{ fontSize: 18, fontWeight: 600 }}>100,000</Text>
+                </View>
+                <Icon name="check" color={Color.secondBg} size={16} />
+              </TouchableOpacity>
+            ))}
+          </View>
         </View>
       </View>
     </Modal>
   );
 };
 
-const FindDestinationAccountScreen = () => {
+
+type FindDestinationAccountScreenNavigationProp = StackNavigationProp<
+  TransferStackParamsList,
+  'FindDestinationAccount'
+>
+
+interface FindDestinationAccountScreenProps {
+  navigation: FindDestinationAccountScreenNavigationProp
+}
+
+const FindDestinationAccountScreen = ({ navigation }: FindDestinationAccountScreenProps) => {
   const [searchBank, setSearchBank] = useState<string>('');
   const [inputAmount, setInputAmount] = useState<string>('');
   const [note, setNote] = useState<string>('Username chuyen tien');
@@ -95,7 +123,7 @@ const FindDestinationAccountScreen = () => {
       paddingVertical: 12,
       justifyContent: 'center',
       borderBottomWidth: 0.5,
-      borderColor: Color.btnBg,
+      borderColor: Color.boldLine,
     },
 
     btnClose: {
@@ -316,7 +344,10 @@ const FindDestinationAccountScreen = () => {
             </Text>
           </View>
           {/* button next */}
-          <TouchableOpacity>
+          <TouchableOpacity
+          activeOpacity={0.7}
+          onPress={() => {navigation.navigate("ConfirmCode", {amount: parseInt(inputAmount), toAccountId: "ABC"})}}
+          >
             <Icon
               name="caret-right"
               size={28}

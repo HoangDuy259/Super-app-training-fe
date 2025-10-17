@@ -12,7 +12,10 @@ const Color = {
   whiteText: '#f2f2f2',
   subText: '#666',
   secondBg: '#ff9900ff',
-  highlightText: '#9500ffff'
+  highlightText: '#9500ffff',
+  boldLine: '#777',
+  lightLine: '#d2d2d2ff',
+
 };
 
 export default Color;
