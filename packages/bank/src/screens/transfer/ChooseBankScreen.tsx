@@ -19,11 +19,11 @@ type ChooseBankScreenNavigationProp = StackNavigationProp<
   'ChooseBank'
 >;
 
-interface ChoposeBankScreenProps {
+interface ChooseBankScreenProps {
   navigation: ChooseBankScreenNavigationProp;
 }
 
-const ChooseBankScreen = ({ navigation }: ChoposeBankScreenProps) => {
+const ChooseBankScreen = ({ navigation }: ChooseBankScreenProps) => {
   const [searchBank, setSearchBank] = useState<string>('');
   const [focused, setFocused] = useState<boolean>(false);
 
@@ -39,10 +39,11 @@ const ChooseBankScreen = ({ navigation }: ChoposeBankScreenProps) => {
 
     header: {
       position: 'relative',
-      paddingVertical: 12,
-      justifyContent: 'center',
+      flexDirection: 'row',
+      alignItems: 'center',
+      padding: 20,
       borderBottomWidth: 0.5,
-      borderColor: Color.btnBg
+      borderColor: Color.boldLine
     },
 
     btnClose: {
@@ -131,7 +132,6 @@ const ChooseBankScreen = ({ navigation }: ChoposeBankScreenProps) => {
           style={{
             color: Color.primaryText,
             fontWeight: 700,
-            textTransform: 'uppercase',
             textAlign: 'center',
             fontSize: 20
           }}
