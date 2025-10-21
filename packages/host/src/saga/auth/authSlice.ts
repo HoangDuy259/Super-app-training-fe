@@ -1,11 +1,11 @@
 // src/features/auth/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type {
-  AuthReponse,
+  AuthResponse,
   AuthState,
   LoginPayload,
   SignupPayload,
-} from './types';
+} from '../../../../shared-types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
@@ -22,7 +22,7 @@ const authSlice = createSlice({
     loginRequest: (state, action: PayloadAction<LoginPayload>) => {
       state.loading = true;
     },
-    loginSuccess: (state, action: PayloadAction<AuthReponse>) => {
+    loginSuccess: (state, action: PayloadAction<AuthResponse>) => {
       const { accessToken, expiresIn } = action.payload;
       state.isAuthenticated = true;
       state.accessToken = accessToken;
@@ -45,10 +45,10 @@ const authSlice = createSlice({
     },
 
     // LOGOUT
-    logout: state => {
+    logoutRequest: state => {
       state.isAuthenticated = false;
       state.accessToken = null;
-      state.expiresIn = null;
+      state.expiresIn = 0;
       state.loading = false;
     },
   },
@@ -61,7 +61,7 @@ export const {
   signupRequest,
   signupSuccess,
   signupFailure,
-  logout,
+  logoutRequest,
 } = authSlice.actions;
 
 export default authSlice.reducer;

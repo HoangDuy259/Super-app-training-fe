@@ -5,11 +5,10 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   useWindowDimensions,
   Image,
 } from 'react-native';
-import React from 'react';
+import React, { useEffect } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -26,7 +25,6 @@ interface BankScreenProps {
 }
 
 const BankScreen = ({ navigation }: BankScreenProps) => {
-  // const { width } = Dimensions.get('window');
   const { width } = useWindowDimensions();
   const itemWidth = (width - 70) / 4;
 
@@ -287,7 +285,13 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               <Icon name="angle-down" size={18} color={Color.secondBg} />
             </View>
             {/* slider */}
-            <View style={{backgroundColor: Color.opacityBg, borderRadius: 20, marginVertical: 20}}>
+            <View
+              style={{
+                backgroundColor: Color.opacityBg,
+                borderRadius: 20,
+                marginVertical: 20,
+              }}
+            >
               <Image
                 source={require('../assets/image/banner/Banner.webp')}
                 style={styles.serviceSlider}

@@ -49,7 +49,7 @@ export default env => {
           bank: `bank@http://10.0.2.2:9000/${platform}/mf-manifest.json`,
         },
         exposes: {
-          './store': './src/store/store',
+          './sessionStorage': './src/utils/sessionStorage',
         },
         shared: {
           ...getSharedDependencies({ eager: true }),

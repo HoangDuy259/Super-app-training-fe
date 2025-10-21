@@ -15,27 +15,20 @@ import {
   signupRequest,
   signupSuccess,
   signupFailure,
-  logout,
+  logoutRequest,
 } from './authSlice';
 import { login, signup } from '../../api/auth';
 import { RootState } from '../../store/store';
 import { Alert } from 'react-native';
+import type { SagaIterator } from 'redux-saga';
+import { sessionStorage } from '../../utils/sessionStorage';
 
 // Worker saga cho đăng nhập
-function* handleLogin(action: ReturnType<typeof loginRequest>) {
-  const { email, password } = action.payload;
-  console.log('loginRequest action received:' + email + ' ' + password);
-
+function* handleLogin(action: ReturnType<typeof loginRequest>): SagaIterator {
   try {
     const response = yield call(login, action.payload);
-    // yield call(saveRefreshToken, response.refreshToken);
-    // console.log('Login successful, response:', response);
-    console.log('Expire in:', Date.now() + response.expiresIn * 1000);
-    console.log('now: ', Date.now());
-    console.log(
-      'expire after: ',
-      Date.now() + response.expiresIn * 1000 - Date.now(),
-    );
+    yield call(sessionStorage.setTokens, response);
+    // console.log('Login response:', response);
     yield put(
       loginSuccess({
         accessToken: response.accessToken,
@@ -56,7 +49,7 @@ function* handleSignup(action: ReturnType<typeof signupRequest>) {
     yield put(signupSuccess());
   } catch (error: any) {
     console.log('Sign up failed:', error.message);
-    showError(error.message);
+    // showError(error.message);
     yield put(signupFailure());
   }
 }
@@ -85,7 +78,7 @@ function* watchAccessTokenExpiry() {
 
     if (timeLeft <= 0) {
       console.log('Token expired, logging out');
-      yield put(logout());
+      yield put(logoutRequest());
     } else {
       // chờ cho đến 5s trước khi hết hạn
       yield delay(Math.max(timeLeft - 5000, 1000));

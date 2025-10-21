@@ -1,27 +1,22 @@
 import axios from 'axios';
-import { LoginPayload, SignupPayload } from '../saga/auth/types';
+import { LoginPayload, LoginResponse, SignupPayload, UserInfo } from '../../../shared-types';
 
 export const API_URL = 'http://10.0.2.2:8080/superApp';
 
-export interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresIn: number;
-  refreshTokenExpiresIn: number;
-}
-
 export const login = async (data: LoginPayload): Promise<LoginResponse> => {
   const response = await axios.post(`${API_URL}/auth/login`, data);
-  console.log(response?.data);
+  // console.log("Prev return: ", response?.data);
   const result = response.data.result;
-  if (result.accessToken) {
+  // console.log('Prev result: ',result);
+  
+  if (!result.access_token) {
     throw new Error(' Access Token is missing in login response');
   }
   return {
-    accessToken: result.accessToken,
+    accessToken: result.access_token,
     expiresIn: Number(result.expires_in),
     refreshToken: result.refresh_token,
-    refreshTokenExpiresIn: result.refresh_expires_in
+    refreshTokenExpiresIn: Number(result.refresh_expires_in)
   };
 };
 
