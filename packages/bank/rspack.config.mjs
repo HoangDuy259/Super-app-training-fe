@@ -32,7 +32,7 @@ const customShared = {
 export default env => {
   const { mode, platform = process.env.PLATFORM } = env;
   const customShared = getSharedDependencies({ eager: true });
-  console.log(customShared);
+  // console.log(customShared);
 
   return {
     mode,
@@ -74,7 +74,9 @@ export default env => {
               './screens/InputAmountScreen': './src/screens/transfer/InputAmountScreen',
               './screens/ConfirmCodeScreen': './src/screens/transfer/ConfirmCodeScreen',
               './screens/TransactionStatusScreen': './src/screens/transfer/ChooseBankScreen',
-              
+              // slice and saga
+              './bankSlice': './src/store/slices/bankSlice',
+              './bankSaga': './src/sagas/bankSaga',
             },
         remotes: {
           host: `host@http://localhost:8081/${platform}/mf-manifest.json`,

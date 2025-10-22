@@ -14,4 +14,4 @@ export type TransferStackParamsList = {
   InputAmount: { toAccountId: string };
   ConfirmCode: { amount: number; toAccountId: string };
   TransactionStatus: { success: boolean; transactionId: string };
-};
+}

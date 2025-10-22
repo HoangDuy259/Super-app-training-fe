@@ -1,8 +1,8 @@
 // AuthContext.tsx
 import React, { createContext, ReactNode } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginRequest, signupRequest, logout } from './authSlice'; // action từ slice
-import { LoginPayload, SignupPayload } from './types';
+import { loginRequest, signupRequest, logoutRequest } from './authSlice'; // action từ slice
+import { LoginPayload, SignupPayload } from '../../../../shared-types';
 import { RootState } from '../../store/store';
 
 interface AuthContextData {
@@ -10,7 +10,7 @@ interface AuthContextData {
   signUp: (payload: SignupPayload) => void;
   logout: () => void;
   isAuthenticated: boolean;
-  isLoading: boolean;
+  loading: boolean;
 }
 
 interface AuthProviderProps {
@@ -24,13 +24,13 @@ export const AuthContext = createContext<AuthContextData>(
 // Provider
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const dispatch = useDispatch();
-  const { isAuthenticated, isLoading } = useSelector(
+  const { isAuthenticated, loading } = useSelector(
     (state: RootState) => state.auth,
   );
 
   const logout = () => {
     console.log('Logging out');
-    dispatch(logout());
+    dispatch(logoutRequest());
   };
 
   const logIn = (payload: LoginPayload) => {
@@ -44,7 +44,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return (
     <AuthContext.Provider
-      value={{ logIn, signUp, logout, isAuthenticated, isLoading }}
+      value={{ logIn, signUp, logout, isAuthenticated, loading }}
     >
       {children}
     </AuthContext.Provider>

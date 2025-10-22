@@ -5,16 +5,17 @@ import {
   ScrollView,
   TouchableOpacity,
   StyleSheet,
-  Dimensions,
   useWindowDimensions,
   Image,
 } from 'react-native';
-import React from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BankStackParamsList } from '../navigation/bank.types';
 import { moreServiceTab, staticTab } from '../constant/bankScreen';
+import { remoteStorage } from '../store/storage/remoteStorage';
+import { UserInfo } from '../../../shared-types';
 
 type BankScreenNavigationProp = StackNavigationProp<
   BankStackParamsList,
@@ -26,9 +27,39 @@ interface BankScreenProps {
 }
 
 const BankScreen = ({ navigation }: BankScreenProps) => {
-  // const { width } = Dimensions.get('window');
   const { width } = useWindowDimensions();
   const itemWidth = (width - 70) / 4;
+  const [token, setToken] = useState<any>(null);
+  const [user, setUser] = useState<UserInfo | null>(null);
+
+  useEffect(() => {
+    // Lấy token hiện tại khi mở màn hình
+    const fetchData = async () => {
+      const tokens = await remoteStorage.getTokens();
+      const userInfo = await remoteStorage.getUser();
+      setToken(tokens);
+      setUser(userInfo);
+    };
+
+    fetchData();
+
+    let unsubscribe: (() => void) | undefined;
+    if ((global as any).eventBus?.on) {
+    unsubscribe = (global as any).eventBus.on('TOKEN_UPDATED', (newToken: any) => {
+      console.log('[TokenTestScreen] Token updated event:', newToken);
+      setToken(newToken);
+    });
+  }
+    // Thử listen event realtime (nếu bạn đang dùng eventBus)
+    // const unsubscribe = (global as any).eventBus?.on?.('TOKEN_UPDATED', (newToken: any) => {
+    //   console.log('[TokenTestScreen] Token updated event:', newToken);
+    //   setToken(newToken);
+    // });
+
+    return () => {
+      unsubscribe?.();
+    };
+  }, []);
 
   const styles = StyleSheet.create({
     safeContainer: {
@@ -177,7 +208,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
 
             <View style={{ flexDirection: 'column' }}>
               <Text style={{ marginRight: 12, color: Color.whiteText }}>
-                Xin chào
+                Xin chào {user?.firstName}
               </Text>
               <Text
                 style={{
@@ -187,7 +218,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
                   flex: 1,
                 }}
               >
-                Tên người dùng
+                {user?.lastName}
               </Text>
             </View>
           </View>
@@ -212,12 +243,6 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
                 </Text>
                 <Text style={{ color: Color.whiteText, fontSize: 20 }}>
                   200,000,000 VND
-                </Text>
-              </View>
-              <View style={[styles.bankAccountItem, { width }]}>
-                <Text style={{ color: Color.whiteText }}>19038668686</Text>
-                <Text style={{ color: Color.whiteText, fontSize: 24 }}>
-                  7,000,0000,000 VND
                 </Text>
               </View>
             </ScrollView>
@@ -287,7 +312,13 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               <Icon name="angle-down" size={18} color={Color.secondBg} />
             </View>
             {/* slider */}
-            <View style={{backgroundColor: Color.opacityBg, borderRadius: 20, marginVertical: 20}}>
+            <View
+              style={{
+                backgroundColor: Color.opacityBg,
+                borderRadius: 20,
+                marginVertical: 20,
+              }}
+            >
               <Image
                 source={require('../assets/image/banner/Banner.webp')}
                 style={styles.serviceSlider}

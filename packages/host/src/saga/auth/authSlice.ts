@@ -1,16 +1,13 @@
 // src/features/auth/authSlice.ts
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type {
-  AuthReponse,
   AuthState,
   LoginPayload,
   SignupPayload,
-} from './types';
+} from '../../../../shared-types';
 
 const initialState: AuthState = {
   isAuthenticated: false,
-  accessToken: null,
-  expiresIn: 0,
   loading: false,
 };
 
@@ -22,11 +19,8 @@ const authSlice = createSlice({
     loginRequest: (state, action: PayloadAction<LoginPayload>) => {
       state.loading = true;
     },
-    loginSuccess: (state, action: PayloadAction<AuthReponse>) => {
-      const { accessToken, expiresIn } = action.payload;
+    loginSuccess: (state) => {
       state.isAuthenticated = true;
-      state.accessToken = accessToken;
-      state.expiresIn = Date.now() + expiresIn * 1000; // Lưu thời gian token hết hạn
       state.loading = false;
     },
     loginFailure: state => {
@@ -45,10 +39,8 @@ const authSlice = createSlice({
     },
 
     // LOGOUT
-    logout: state => {
+    logoutRequest: state => {
       state.isAuthenticated = false;
-      state.accessToken = null;
-      state.expiresIn = null;
       state.loading = false;
     },
   },
@@ -61,7 +53,7 @@ export const {
   signupRequest,
   signupSuccess,
   signupFailure,
-  logout,
+  logoutRequest,
 } = authSlice.actions;
 
 export default authSlice.reducer;
