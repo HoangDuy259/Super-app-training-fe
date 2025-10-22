@@ -16,9 +16,10 @@ function* fetchBanksSaga(): SagaIterator {
   }
 }
 
-function* fetchTransactionHistorySaga(): SagaIterator {
+function* fetchBankAccountsSaga(userId: string): SagaIterator {
   try{
-    
+    const bankAccounts = yield call(bankApi.getBankAccountsByUserId, userId)
+    yield put(fetchSuccess)
   }catch(error: any) {
 
   }

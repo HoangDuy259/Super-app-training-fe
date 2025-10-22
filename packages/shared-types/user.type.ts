@@ -3,5 +3,5 @@ export interface UserInfo {
   username: string;
   lastName: string;
   firstName: string;
-  token: string;
+  email: string;
 }

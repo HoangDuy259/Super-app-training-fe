@@ -14,3 +14,6 @@ declare module 'bank/bankSlice'
 // sagas:
 declare module 'bank/bankSaga'
 // thêm các module khác ở đây
+
+// screen account:
+declare module 'bank/screens/AccountScreen'

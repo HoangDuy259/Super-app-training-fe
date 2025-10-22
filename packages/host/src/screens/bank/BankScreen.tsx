@@ -21,45 +21,31 @@ interface BankScreenProps {
 
 const BankScreen = ({ navigation }: BankScreenProps) => {
   console.log('[BankScreen] Rendered');
-  useEffect(() => {
-    async function initBankModule() {
-      try {
-        // load và inject banks slice/saga
-        const { default: banksReducer } = await import('bank/bankSlice');
-        const { banksSaga } = await import('bank/bankSaga');
-        injectReducer('banks', banksReducer);
-        runSaga(banksSaga);
+  // useEffect(() => {
+  //   async function initBankModule() {
+  //     try {
+  //       // load và inject banks slice/saga
+  //       const { default: banksReducer } = await import('bank/bankSlice');
+  //       const { banksSaga } = await import('bank/bankSaga');
+  //       injectReducer('banks', banksReducer);
+  //       runSaga(banksSaga);
 
-        // tương tự cho accounts
-        // const { default: accountsReducer } = await import('bank/accountsSlice');
-        // const { accountsSaga } = await import('bank/accountsSaga');
-        // injectReducer('accounts', accountsReducer);
-        // runSaga(accountsSaga);
+  //       // tương tự cho accounts
+  //       // const { default: accountsReducer } = await import('bank/accountsSlice');
+  //       // const { accountsSaga } = await import('bank/accountsSaga');
+  //       // injectReducer('accounts', accountsReducer);
+  //       // runSaga(accountsSaga);
 
-        // tương tự cho transaction
-        // const { default: transactionReducer } = await import('bank/transactionSlice');
-        // const { transactionSaga } = await import('bank/transactionSaga');
-        // injectReducer('transaction', transactionReducer);
-        // runSaga(transactionSaga);
-      } catch (error) {
-        console.error('Failed to load bank module:', error);
-      }
-    }
-  },[]);
-
-  useEffect(() => {
-    console.log("Use effect active");
-    
-    async function loadUser() {
-      try {
-        const tokens = await sessionStorage.getTokens();
-        console.log('User tokens:', tokens);
-      } catch (err) {
-        console.error('Failed to load host module:', err);
-      }
-    }
-    loadUser();
-  }, []);
+  //       // tương tự cho transaction
+  //       // const { default: transactionReducer } = await import('bank/transactionSlice');
+  //       // const { transactionSaga } = await import('bank/transactionSaga');
+  //       // injectReducer('transaction', transactionReducer);
+  //       // runSaga(transactionSaga);
+  //     } catch (error) {
+  //       console.error('Failed to load bank module:', error);
+  //     }
+  //   }
+  // },[]);
 
   return (
     <ErrorBoundary name="BankScreen">

@@ -17,23 +17,25 @@ import {
   signupFailure,
   logoutRequest,
 } from './authSlice';
-import { login, signup } from '../../api/auth';
+import { login, signup, refreshAccessToken, getUserInfo } from '../../api/auth';
 import { RootState } from '../../store/store';
 import { Alert } from 'react-native';
 import type { SagaIterator } from 'redux-saga';
-import { sessionStorage } from '../../utils/sessionStorage';
+import { hostSession } from '../../utils/hostStorage';
+import { eventBus } from '../../../../shared-types/utils/eventBus';
 
 // Worker saga cho đăng nhập
 function* handleLogin(action: ReturnType<typeof loginRequest>): SagaIterator {
   try {
     const response = yield call(login, action.payload);
-    yield call(sessionStorage.setTokens, response);
-    // console.log('Login response:', response);
+    yield call(hostSession.setTokens, response);
+    const tokens = yield call(hostSession.getTokens);
+    console.log('saved token: ', tokens.accessToken );
+    const user = yield call(getUserInfo, tokens.accessToken);
+    console.log('user in saga: ',user);
+    yield call(hostSession.setUser, user);
     yield put(
-      loginSuccess({
-        accessToken: response.accessToken,
-        expiresIn: response.expiresIn,
-      }),
+      loginSuccess(),
     );
   } catch (error: any) {
     console.log('Login failed:', error.message);
@@ -64,11 +66,12 @@ function* watchAuth() {
 }
 
 // Xử lý tự động log out khi access token đã hết hạn
-function* watchAccessTokenExpiry() {
+function* watchAccessTokenExpiry(): SagaIterator {
   while (true) {
     const state: RootState = yield select();
-    const { expiresIn } = state.auth;
-    if (!expiresIn) {
+    const { expiresIn, refreshTokenExpiresIn, refreshToken } = state.auth;
+
+    if (!expiresIn || !refreshTokenExpiresIn) {
       yield delay(5000);
       continue;
     }
@@ -77,10 +80,27 @@ function* watchAccessTokenExpiry() {
     const timeLeft = expiresIn - now;
 
     if (timeLeft <= 0) {
-      console.log('Token expired, logging out');
-      yield put(logoutRequest());
+      try {
+        console.log('[AuthSaga] Access token expired → refreshing...');
+        const newTokens = yield call(refreshAccessToken, refreshToken);
+        yield call(hostSession.setTokens, newTokens);
+
+        yield put(
+          loginSuccess()
+        );
+
+        // 🔹 Bắn event để các remote cập nhật token
+        eventBus.emit('TOKEN_UPDATED', newTokens);
+
+        console.log('[AuthSaga] Token refreshed successfully');
+      } catch (err: any) {
+        console.error('[AuthSaga] Refresh failed:', err.message);
+        // refresh token hết hạn hoặc lỗi → logout
+        yield call(hostSession.clearTokens);
+        yield put(logoutRequest());
+      }
     } else {
-      // chờ cho đến 5s trước khi hết hạn
+      // refresh 5s trước khi hết hạn
       yield delay(Math.max(timeLeft - 5000, 1000));
     }
   }

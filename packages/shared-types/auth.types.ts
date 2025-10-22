@@ -1,7 +1,5 @@
 export interface AuthState {
   isAuthenticated: boolean;
-  accessToken: string | null;
-  expiresIn: number;
   loading: boolean;
 }
 
@@ -15,11 +13,6 @@ export interface LoginResponse {
   refreshToken: string;
   expiresIn: number;
   refreshTokenExpiresIn: number;
-}
-
-export interface AuthResponse {
-  accessToken: string;
-  expiresIn: number;
 }
 
 export interface SignupPayload {

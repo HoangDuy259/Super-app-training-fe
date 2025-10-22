@@ -6,14 +6,13 @@ import authReducer from '../saga/auth/authSlice';
 import rootSaga from '../saga/rootSaga';
 
 // slice
-import type { AuthState, BanksState} from '../../../shared-types';
+import type { AuthState, BanksState, LoginResponse} from '../../../shared-types';
 
 export interface RootState {
-  auth: AuthState;
+  auth: LoginResponse & AuthState;
   banks?: BanksState;
   // accounts?: AccountsState;
   // transaction?: TransactionState;
-  // ui?: UiState; nếu có
 }
 
 // generic type cho dynamic reducers

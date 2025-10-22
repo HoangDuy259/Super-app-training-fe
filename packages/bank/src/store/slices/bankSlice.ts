@@ -8,6 +8,7 @@ const initialState: BanksState = {
   selectedId: null,
   loading: false,
   error: null,
+  bankAccount: []
 };
 
 const banksSlice = createSlice({
