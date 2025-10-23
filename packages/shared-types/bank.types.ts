@@ -1,3 +1,7 @@
+import { AccountStatus } from "./enums/AccountStatus.enum";
+import { TransactionType } from "./enums/TransactionType.enum";
+import { TransactionStatus } from "./enums/TransactionStatus.enum";
+
 // BanksState
 export interface Bank {
   id: string;
@@ -5,12 +9,12 @@ export interface Bank {
   code: string;
 }
 
-export interface BanksState {
-  list: Bank[];
-  selectedId: string | null;
+export interface BankState {
+  accounts: BankAccount[];
+  transactions: Transaction[];
   loading: boolean;
   error: string | null;
-  bankAccount: BankAccount[];
+  selectedId: string | null;
 }
 
 // AccountsState
@@ -18,9 +22,17 @@ export interface BankAccount {
   id: string;
   accountNumber: string;
   balance: number;
-  status: string;
+  status: AccountStatus;
 }
 
+export interface Transaction {
+  amount: number;
+  sourceAccountId: string;
+  destinationAccountId: string;
+  transactionType: TransactionType;
+  status: TransactionStatus;
+  description: string;
+}
 // export interface AccountsState {
 //   userAccounts: Account[];
 //   destinationAccounts: Account[];
@@ -31,13 +43,6 @@ export interface BankAccount {
 // }
 
 // TransactionState
-// export interface TransactionDraft {
-//   amount: number;
-//   content: string;
-//   bankId: string;
-//   sourceAccountId: string;
-//   destinationAccount: Account;
-// }
 
 // export interface TransactionState {
 //   draft: TransactionDraft | null;

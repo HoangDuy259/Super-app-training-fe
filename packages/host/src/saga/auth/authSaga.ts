@@ -30,9 +30,9 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): SagaIterator {
     const response = yield call(login, action.payload);
     yield call(hostSession.setTokens, response);
     const tokens = yield call(hostSession.getTokens);
-    console.log('saved token: ', tokens.accessToken );
+    // console.log('saved token: ', tokens.accessToken );
     const user = yield call(getUserInfo, tokens.accessToken);
-    console.log('user in saga: ',user);
+    // console.log('user in saga: ',user);
     yield call(hostSession.setUser, user);
     yield put(
       loginSuccess(),
@@ -49,16 +49,13 @@ function* handleSignup(action: ReturnType<typeof signupRequest>) {
   try {
     yield call(signup, action.payload);
     yield put(signupSuccess());
+
   } catch (error: any) {
     console.log('Sign up failed:', error.message);
     // showError(error.message);
     yield put(signupFailure());
   }
 }
-
-//Worker saga cho xử lý token hết hạn
-
-// Watcher auth
 
 function* watchAuth() {
   yield takeLatest(loginRequest.type, handleLogin);

@@ -16,6 +16,9 @@ import { BankStackParamsList } from '../navigation/bank.types';
 import { moreServiceTab, staticTab } from '../constant/bankScreen';
 import { remoteStorage } from '../store/storage/remoteStorage';
 import { UserInfo } from '../../../shared-types';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../host/src/store/store';
+import { getAccountRequest } from '../store/slices/bankSlice';
 
 type BankScreenNavigationProp = StackNavigationProp<
   BankStackParamsList,
@@ -32,35 +35,64 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   const [token, setToken] = useState<any>(null);
   const [user, setUser] = useState<UserInfo | null>(null);
 
+  const dispatch = useDispatch();
+  const { accounts, loading } = useSelector(
+    (state: RootState) => state.bank || {},
+  );
+
+  console.log('[REMOTE] BankScreen RENDERED!');
+
   useEffect(() => {
-    // Lấy token hiện tại khi mở màn hình
-    const fetchData = async () => {
-      const tokens = await remoteStorage.getTokens();
-      const userInfo = await remoteStorage.getUser();
-      setToken(tokens);
-      setUser(userInfo);
+    const initBankData = async () => {
+      try {
+        const tokens = await remoteStorage.getTokens();
+        const userInfo = await remoteStorage.getUser();
+
+        console.log('🔑 TOKEN:', tokens?.accessToken);
+        console.log('👤 USER ID:', userInfo?.id);
+
+        if (!tokens?.accessToken || !userInfo?.id) {
+          console.log('[REMOTE] ❌ Missing token or user!');
+          return;
+        }
+
+        dispatch(getAccountRequest(userInfo.id));
+      } catch (error) {
+        console.error('[REMOTE] Init error:', error);
+      }
     };
 
-    fetchData();
+    initBankData();
+  }, [dispatch]);
 
-    let unsubscribe: (() => void) | undefined;
-    if ((global as any).eventBus?.on) {
-    unsubscribe = (global as any).eventBus.on('TOKEN_UPDATED', (newToken: any) => {
-      console.log('[TokenTestScreen] Token updated event:', newToken);
-      setToken(newToken);
-    });
+  // useEffect(() => {
+
+  //   let unsubscribe: (() => void) | undefined;
+  //   if ((global as any).eventBus?.on) {
+  //     unsubscribe = (global as any).eventBus.on(
+  //       'TOKEN_UPDATED',
+  //       (newToken: any) => {
+  //         console.log('[TokenTestScreen] Token updated event:', newToken);
+  //         setToken(newToken);
+  //       },
+  //     );
+  //   }
+  // Thử listen event realtime (nếu bạn đang dùng eventBus)
+  // const unsubscribe = (global as any).eventBus?.on?.('TOKEN_UPDATED', (newToken: any) => {
+  //   console.log('[TokenTestScreen] Token updated event:', newToken);
+  //   setToken(newToken);
+  // });
+
+  //   return () => {
+  //     unsubscribe?.();
+  //   };
+  // }, []);
+
+  if (loading) {
+    console.log('account in screen: ', accounts);
+
+    return <Text>LOADING ACCOUNTS....</Text>;
   }
-    // Thử listen event realtime (nếu bạn đang dùng eventBus)
-    // const unsubscribe = (global as any).eventBus?.on?.('TOKEN_UPDATED', (newToken: any) => {
-    //   console.log('[TokenTestScreen] Token updated event:', newToken);
-    //   setToken(newToken);
-    // });
-
-    return () => {
-      unsubscribe?.();
-    };
-  }, []);
-
   const styles = StyleSheet.create({
     safeContainer: {
       flex: 1,
@@ -237,21 +269,23 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               pagingEnabled
               showsHorizontalScrollIndicator={false}
             >
-              <View style={[styles.bankAccountItem, { width }]}>
-                <Text style={{ color: Color.whiteText, fontWeight: 700 }}>
-                  200339798386
-                </Text>
-                <Text style={{ color: Color.whiteText, fontSize: 20 }}>
-                  200,000,000 VND
-                </Text>
-              </View>
+              {accounts.map(acc => (
+                <View key={acc.id} style={[styles.bankAccountItem, { width }]}>
+                  <Text style={{ color: Color.whiteText, fontWeight: 700 }}>
+                    {acc.accountNumber}
+                  </Text>
+                  <Text style={{ color: Color.whiteText, fontSize: 20 }}>
+                    {acc.balance} VND
+                  </Text>
+                </View>
+              ))}
             </ScrollView>
             <View style={styles.bankAccountItemController}>
               <TouchableOpacity
                 style={styles.buttonController}
                 activeOpacity={0.7}
                 onPress={() =>
-                  navigation.navigate('TransferFlow', { fromAccountId: 'ABC' })
+                  navigation.navigate('TransferFlow', { fromAccountId: `AAA` })
                 }
               >
                 <View style={styles.buttonControllerIcon}>
