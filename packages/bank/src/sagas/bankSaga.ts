@@ -1,32 +1,48 @@
 import { call, put, takeLatest } from 'redux-saga/effects';
 import { bankApi } from '../api/bankApi'; // Api của bank
 import {
-  fetchRequest,
-  fetchSuccess,
-  fetchFailure,
+  getAccountSuccess,
+  getAccountFailure,
+  getTransactionSuccess,
+  getTransactionFailure,
+  getAccountRequest,
+  getTransactionRequest,
 } from '../store/slices/bankSlice';
 import type { SagaIterator } from 'redux-saga';
 
-function* fetchBanksSaga(): SagaIterator {
+
+function* fetchBankAccountsSaga(action: ReturnType<typeof getAccountRequest>): SagaIterator {
+  console.log('[SAGA] handleGetAccount called with:', action.payload);
   try {
-    const banks = yield call(bankApi.getBanks);
-    yield put(fetchSuccess(banks));
+    console.log('[SAGA] Calling API...');
+    const userId = action.payload;
+    const accounts = yield call(bankApi.getBankAccountsByUserId, userId);
+    console.log('[SAGA] API Response:', accounts);
+
+    yield put(getAccountSuccess(accounts));
+    console.log('[SAGA] Dispatched getAccountSuccess');
   } catch (error: any) {
-    yield put(fetchFailure(error.message));
+    console.log('[SAGA] API Error:', error);
+    yield put(getAccountFailure(error));
   }
 }
 
-function* fetchBankAccountsSaga(userId: string): SagaIterator {
-  try{
-    const bankAccounts = yield call(bankApi.getBankAccountsByUserId, userId)
-    yield put(fetchSuccess)
-  }catch(error: any) {
-
+function* fetchTransactionsSaga(action: ReturnType<typeof getTransactionRequest>): SagaIterator {
+  try {
+    const accountId = action.payload;
+    const transactions = yield call(
+      bankApi.getTransactionsByAccountId,
+      accountId,
+    );
+    console.log(transactions);
+    yield put(getTransactionSuccess(transactions));
+  } catch (error: any) {
+    yield put(getTransactionFailure(error));
   }
 }
 
-export function* banksSaga() {
-  yield takeLatest(fetchRequest.type, fetchBanksSaga);
-  yield takeLatest(fetchRequest.type, fetchBanksSaga);
+export function* bankSaga() {
+  yield takeLatest(getAccountRequest.type, fetchBankAccountsSaga);
+  yield takeLatest(getTransactionRequest.type, fetchTransactionsSaga);
   // Thêm watchers khác nếu cần (search, etc.)
 }

@@ -6,11 +6,11 @@ import authReducer from '../saga/auth/authSlice';
 import rootSaga from '../saga/rootSaga';
 
 // slice
-import type { AuthState, BanksState, LoginResponse} from '../../../shared-types';
+import type { AuthState, BankState, LoginResponse} from '../../../shared-types';
 
 export interface RootState {
   auth: LoginResponse & AuthState;
-  banks?: BanksState;
+  bank: BankState;
   // accounts?: AccountsState;
   // transaction?: TransactionState;
 }

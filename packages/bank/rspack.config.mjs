@@ -64,6 +64,8 @@ export default env => {
           ? undefined
           : {
             // định nghĩa các màn hình remote ở đây
+              // remote navigation
+              './navigation/BankNavigation': './src/navigation/BankNavigation',
               // home 
               './screens/BankScreen': './src/screens/BankScreen',
               // account
@@ -75,8 +77,8 @@ export default env => {
               './screens/ConfirmCodeScreen': './src/screens/transfer/ConfirmCodeScreen',
               './screens/TransactionStatusScreen': './src/screens/transfer/ChooseBankScreen',
               // slice and saga
-              './bankSlice': './src/store/slices/bankSlice',
-              './bankSaga': './src/sagas/bankSaga',
+              './store/bankSlice': './src/store/slices/bankSlice',
+              './sagas/bankSaga': './src/sagas/bankSaga',
             },
         remotes: {
           host: `host@http://localhost:8081/${platform}/mf-manifest.json`,
