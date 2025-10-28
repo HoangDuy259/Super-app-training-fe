@@ -141,7 +141,7 @@ const ChooseBankScreen = ({ navigation }: ChooseBankScreenProps) => {
         <TouchableOpacity
           style={styles.btnClose}
           activeOpacity={0.7}
-          onPress={() => console.log('TouchableOpacity pressed')}
+          onPress={() => navigation.goBack()}
         >
           <Icon name="xmark" size={28} />
         </TouchableOpacity>
