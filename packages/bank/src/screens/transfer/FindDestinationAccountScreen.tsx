@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Modal,
   SafeAreaView,
@@ -13,7 +13,11 @@ import Color from '../../themes/Color';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { TransferStackParamsList } from '../../navigation/bank.types';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../host/src/store/store';
+import { findDestinationAccountRequest } from '../../store/slices/transferSlice';
 
+// MODAL OF CHOOSING ACCOUNT
 interface ChooseAccountModalProps {
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -22,6 +26,7 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
   visible,
   setVisible,
 }) => {
+  const { accounts } = useSelector((state: RootState) => state.accountUI || {});
   const styles = StyleSheet.create({
     overlay: {
       flex: 1,
@@ -47,7 +52,7 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
       alignItems: 'center',
       padding: 20,
       borderBottomWidth: 0.5,
-      borderColor: Color.boldLine
+      borderColor: Color.boldLine,
     },
   });
   return (
@@ -65,10 +70,10 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
               <Icon name="xmark" size={24} />
             </TouchableOpacity>
           </View>
-          <View style={{padding: 20}}>
-            {Array.from({ length: 4 }).map((_, i) => (
+          <View style={{ padding: 20 }}>
+            {accounts.map(acc => (
               <TouchableOpacity
-                key={i}
+                key={acc.id}
                 style={styles.accountItem}
                 onPress={() => {
                   console.log('Chọn tài khoản 191289341');
@@ -77,9 +82,11 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
               >
                 <View>
                   <Text style={{ fontSize: 14, marginBottom: 4 }}>
-                    191289341
+                    {acc.accountNumber}
                   </Text>
-                  <Text style={{ fontSize: 18, fontWeight: 600 }}>100,000</Text>
+                  <Text style={{ fontSize: 18, fontWeight: 600 }}>
+                    {acc.balance}
+                  </Text>
                 </View>
                 <Icon name="check" color={Color.secondBg} size={16} />
               </TouchableOpacity>
@@ -91,18 +98,21 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
   );
 };
 
-
+// MAIN COMPONENT
 type FindDestinationAccountScreenNavigationProp = StackNavigationProp<
   TransferStackParamsList,
   'FindDestinationAccount'
->
+>;
 
 interface FindDestinationAccountScreenProps {
-  navigation: FindDestinationAccountScreenNavigationProp
+  navigation: FindDestinationAccountScreenNavigationProp;
 }
 
-const FindDestinationAccountScreen = ({ navigation }: FindDestinationAccountScreenProps) => {
-  const [searchBank, setSearchBank] = useState<string>('');
+const FindDestinationAccountScreen = ({
+  navigation,
+}: FindDestinationAccountScreenProps) => {
+  // local state
+  const [searchAccount, setSearchAccount] = useState<string>('');
   const [inputAmount, setInputAmount] = useState<string>('');
   const [note, setNote] = useState<string>('Username chuyen tien');
   const { height } = useWindowDimensions();
@@ -110,6 +120,23 @@ const FindDestinationAccountScreen = ({ navigation }: FindDestinationAccountScre
   const [focused, setFocused] = useState<boolean>(false);
   const [foundAccount, setFoundAccount] = useState<boolean>(false);
   const [showModal, setShowModal] = useState(false);
+
+  // redux state
+  const { selectedAccount, destinationAccount } = useSelector(
+    (state: RootState) => state.transferUI || {},
+  );
+
+  // hooks
+  const dispatch = useDispatch();
+  useEffect(() => {
+    console.log('[remote] des acc: ', destinationAccount);
+  }, [destinationAccount]);
+
+  // handle find destination account
+  const handleFindDestinationAccount = (accNum: string) => {
+    setFoundAccount(true);
+    dispatch(findDestinationAccountRequest(accNum));
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -236,8 +263,8 @@ const FindDestinationAccountScreen = ({ navigation }: FindDestinationAccountScre
           >
             <Icon name="building-columns" size={32} />
             <View style={styles.infoDetail}>
-              <Text>Nguồn tiền: 191289341</Text>
-              <Text>Số dư: 700.000.000</Text>
+              <Text>Nguồn tiền: {selectedAccount?.accountNumber}</Text>
+              <Text>Số dư: {selectedAccount?.balance}</Text>
             </View>
             <Icon name="angle-right" size={24} />
           </TouchableOpacity>
@@ -249,14 +276,17 @@ const FindDestinationAccountScreen = ({ navigation }: FindDestinationAccountScre
                 <Text>Tên ngân hàng nhận</Text>
               </View>
             )}
-            <Icon name="angle-right" size={24} />
-            {/* {foundAccount && (
+            {foundAccount && (
               <View style={styles.infoDetail}>
-                <Text>Tài khoản nhận: 1209381298</Text>
+                <Text>Tài khoản nhận: {destinationAccount?.accountNumber}</Text>
                 <Text>Tên ngân hàng nhận</Text>
-                <Text>Tên người nhận</Text>
+                <Text>
+                  {destinationAccount?.user.firstName}{' '}
+                  {destinationAccount?.user.lastName}
+                </Text>
               </View>
-            )} */}
+            )}
+            <Icon name="angle-right" size={24} />
           </TouchableOpacity>
         </View>
         {/* search box */}
@@ -272,8 +302,8 @@ const FindDestinationAccountScreen = ({ navigation }: FindDestinationAccountScre
               keyboardType="default"
               autoCapitalize="none"
               style={styles.input}
-              value={searchBank}
-              onChangeText={setSearchBank}
+              value={searchAccount}
+              onChangeText={setSearchAccount}
               onFocus={() => setFocused(true)}
               onBlur={() => setFocused(false)}
             />
@@ -284,6 +314,7 @@ const FindDestinationAccountScreen = ({ navigation }: FindDestinationAccountScre
               size={28}
               color={Color.whiteText}
               style={styles.btnSearch}
+              onPress={() => handleFindDestinationAccount(searchAccount)}
             />
           </TouchableOpacity>
         </View>
@@ -345,8 +376,13 @@ const FindDestinationAccountScreen = ({ navigation }: FindDestinationAccountScre
           </View>
           {/* button next */}
           <TouchableOpacity
-          activeOpacity={0.7}
-          onPress={() => {navigation.navigate("ConfirmCode", {amount: parseInt(inputAmount), toAccountId: "ABC"})}}
+            activeOpacity={0.7}
+            onPress={() => {
+              navigation.navigate('ConfirmCode', {
+                amount: parseInt(inputAmount),
+                toAccountId: 'ABC',
+              });
+            }}
           >
             <Icon
               name="caret-right"

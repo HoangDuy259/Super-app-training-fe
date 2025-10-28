@@ -4,7 +4,9 @@ import ErrorBoundary from '../../components/ErrorBoundary';
 import { injectReducer, runSaga } from '../../store/store';
 
 console.log('[Host] Importing Bank remote...');
-const RemoteBankNavigation = React.lazy(() => import('bank/navigation/BankNavigation'));
+const RemoteBankNavigation = React.lazy(
+  () => import('bank/navigation/BankNavigation'),
+);
 
 const BankScreen = () => {
   const [isReady, setIsReady] = React.useState(false);
@@ -13,9 +15,19 @@ const BankScreen = () => {
     async function initBankModule() {
       try {
         console.log('[Host] Loading Bank Redux Module...');
-        const { default: bankReducer } = await import('bank/store/bankSlice');
-        const { bankSaga } = await import('bank/sagas/bankSaga');
-        injectReducer('bank', bankReducer);
+        // const { default: bankReducer } = await import('bank/store/bankSlice');
+        // const { bankSaga } = await import('bank/sagas/bankSaga');
+        // injectReducer('bank', bankReducer);
+        // runSaga(bankSaga);
+        const { default: accountReducer } = await import(
+          'bank/store/accountSlice'
+        );
+        const { default: transferReducer } = await import(
+          'bank/store/transferSlice'
+        );
+        const { bankSaga } = await import('bank/sagas');
+        injectReducer('accountUI', accountReducer);
+        injectReducer('transferUI', transferReducer);
         runSaga(bankSaga);
         console.log('[Host] Bank Redux injected SUCCESS!');
         setIsReady(true);
@@ -36,6 +48,5 @@ const BankScreen = () => {
     </ErrorBoundary>
   );
 };
-
 
 export default BankScreen;

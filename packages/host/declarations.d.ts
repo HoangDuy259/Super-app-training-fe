@@ -12,9 +12,10 @@ declare module 'bank/screens/transfer/ConfirmCodeScreen';
 // screen/bank/account
 declare module 'bank/screens/account/AccountScreen';
 // slices:
-declare module 'bank/store/bankSlice'
+declare module 'bank/store/transferSlice'
+declare module 'bank/store/accountSlice'
 // sagas:
-declare module 'bank/sagas/bankSaga'
+declare module 'bank/sagas'
 // thêm các module khác ở đây
 
 // screen account:

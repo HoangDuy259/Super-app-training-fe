@@ -7,8 +7,10 @@ import {
   StyleSheet,
   useWindowDimensions,
   Image,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
 } from 'react-native';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -18,7 +20,8 @@ import { remoteStorage } from '../store/storage/remoteStorage';
 import { UserInfo } from '../../../shared-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../host/src/store/store';
-import { getAccountRequest } from '../store/slices/bankSlice';
+import { getAccountRequest } from '../store/slices/accountSlice';
+import { selectAccount } from '../store/slices/transferSlice';
 
 type BankScreenNavigationProp = StackNavigationProp<
   BankStackParamsList,
@@ -32,12 +35,14 @@ interface BankScreenProps {
 const BankScreen = ({ navigation }: BankScreenProps) => {
   const { width } = useWindowDimensions();
   const itemWidth = (width - 70) / 4;
-  const [token, setToken] = useState<any>(null);
   const [user, setUser] = useState<UserInfo | null>(null);
 
   const dispatch = useDispatch();
   const { accounts, loading } = useSelector(
-    (state: RootState) => state.bank || {},
+    (state: RootState) => state.accountUI || {},
+  );
+  const { selectedAccount } = useSelector(
+    (state: RootState) => state.transferUI,
   );
 
   console.log('[REMOTE] BankScreen RENDERED!');
@@ -47,16 +52,18 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
       try {
         const tokens = await remoteStorage.getTokens();
         const userInfo = await remoteStorage.getUser();
+        setUser(userInfo);
 
-        console.log('🔑 TOKEN:', tokens?.accessToken);
-        console.log('👤 USER ID:', userInfo?.id);
+        // console.log('TOKEN:', tokens?.accessToken);
+        // console.log('USER ID:', userInfo?.id);
 
         if (!tokens?.accessToken || !userInfo?.id) {
-          console.log('[REMOTE] ❌ Missing token or user!');
+          console.log('[REMOTE] Missing token or user!');
           return;
         }
 
         dispatch(getAccountRequest(userInfo.id));
+        dispatch(selectAccount(accounts[0]));
       } catch (error) {
         console.error('[REMOTE] Init error:', error);
       }
@@ -65,6 +72,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
     initBankData();
   }, [dispatch]);
 
+  // handle expiration of access token
   // useEffect(() => {
 
   //   let unsubscribe: (() => void) | undefined;
@@ -87,6 +95,21 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   //     unsubscribe?.();
   //   };
   // }, []);
+
+  // handle scroll end action
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetX = e.nativeEvent.contentOffset.x;
+    const index = Math.round(offsetX / width);
+    setCurrentIndex(index);
+    console.log('index: ', index);
+
+    dispatch(selectAccount(accounts[index]));
+  };
+
+  useEffect(() => {
+    console.log('[remote] selected acc: ', selectedAccount);
+  }, [selectedAccount]);
 
   if (loading) {
     console.log('account in screen: ', accounts);
@@ -268,6 +291,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               horizontal
               pagingEnabled
               showsHorizontalScrollIndicator={false}
+              onMomentumScrollEnd={handleScrollEnd}
             >
               {accounts.map(acc => (
                 <View key={acc.id} style={[styles.bankAccountItem, { width }]}>
@@ -284,9 +308,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               <TouchableOpacity
                 style={styles.buttonController}
                 activeOpacity={0.7}
-                onPress={() =>
-                  navigation.navigate('TransferFlow', { fromAccountId: `AAA` })
-                }
+                onPress={() => navigation.navigate('TransferFlow')}
               >
                 <View style={styles.buttonControllerIcon}>
                   <Icon name="right-left" size={32} color={Color.whiteText} />

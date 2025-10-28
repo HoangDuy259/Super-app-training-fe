@@ -63,22 +63,29 @@ export default env => {
         exposes: STANDALONE
           ? undefined
           : {
-            // định nghĩa các màn hình remote ở đây
+              // định nghĩa các màn hình remote ở đây
               // remote navigation
               './navigation/BankNavigation': './src/navigation/BankNavigation',
-              // home 
+              // home
               './screens/BankScreen': './src/screens/BankScreen',
               // account
               './screens/AccountScreen': './src/screens/account/AccountScreen',
               // transfer
-              './screens/ChooseBankScreen': './src/screens/transfer/ChooseBankScreen',
-              './screens/FindDestinationAccountScreen': './src/screens/transfer/FindDestinationAccountScreen',
-              './screens/InputAmountScreen': './src/screens/transfer/InputAmountScreen',
-              './screens/ConfirmCodeScreen': './src/screens/transfer/ConfirmCodeScreen',
-              './screens/TransactionStatusScreen': './src/screens/transfer/ChooseBankScreen',
+              './screens/ChooseBankScreen':
+                './src/screens/transfer/ChooseBankScreen',
+              './screens/FindDestinationAccountScreen':
+                './src/screens/transfer/FindDestinationAccountScreen',
+              './screens/InputAmountScreen':
+                './src/screens/transfer/InputAmountScreen',
+              './screens/ConfirmCodeScreen':
+                './src/screens/transfer/ConfirmCodeScreen',
+              './screens/TransactionStatusScreen':
+                './src/screens/transfer/ChooseBankScreen',
               // slice and saga
-              './store/bankSlice': './src/store/slices/bankSlice',
-              './sagas/bankSaga': './src/sagas/bankSaga',
+              './store/slices': './src/store/slices/index.ts',
+              './store/accountSlice': './src/store/slices/accountSlice',
+              './store/transferSlice': './src/store/slices/transferSlice',
+              './sagas': './src/sagas/index.ts',
             },
         remotes: {
           host: `host@http://localhost:8081/${platform}/mf-manifest.json`,
