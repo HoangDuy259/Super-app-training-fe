@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -14,6 +14,11 @@ import {
   BankStackParamsList,
 } from '../../navigation/bank.types';
 import { CompositeNavigationProp } from '@react-navigation/native';
+import { useSelector } from 'react-redux';
+import { RootState } from '../../../../host/src/store/store';
+import { TransactionStatus } from '../../../../shared-types/enums/TransactionStatus.enum';
+import {formatDateTime, formatNumberWithCommas} from '../../utils/formatter'
+
 
 type TransactionStatusScreenNavigationProp = CompositeNavigationProp<
   StackNavigationProp<TransferStackParamsList, 'TransactionStatus'>,
@@ -27,6 +32,17 @@ interface TransactionStatusScreenProps {
 const TransactionStatusScreen = ({
   navigation,
 }: TransactionStatusScreenProps) => {
+  // redux state
+  const { loading, currentTransaction } = useSelector(
+    (state: RootState) => state.transactionUI || {},
+  );
+  const { destinationAccount } = useSelector(
+    (state: RootState) => state.transferUI || {},
+  );
+  // hooks
+  useEffect(() => {
+    console.log('[remote] current transaction: ', currentTransaction);
+  }, []);
   const styles = StyleSheet.create({
     container: {
       marginTop: 30,
@@ -35,19 +51,19 @@ const TransactionStatusScreen = ({
       paddingHorizontal: 8,
       paddingVertical: 20,
       position: 'relative',
-      height: '95%'
+      height: '95%',
     },
     transactionStatusContent: {
       flexDirection: 'column',
       alignItems: 'center',
-      alignContent: 'center'
+      alignContent: 'center',
     },
     btnStatus: {
       backgroundColor: 'rgba(20, 202, 63, 0.1)',
       alignSelf: 'center',
       padding: 8,
       borderRadius: 100,
-      marginBottom: 8
+      marginBottom: 8,
     },
     btnControllerContainer: {
       position: 'absolute',
@@ -72,6 +88,7 @@ const TransactionStatusScreen = ({
       marginRight: 4,
     },
   });
+  if (loading) return <Text>Đang loading...</Text>;
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.content}>
@@ -83,34 +100,54 @@ const TransactionStatusScreen = ({
 
           <Text
             style={{
-              color: Color.success,
+              color: `${
+                currentTransaction?.status === TransactionStatus.Success
+              } ? ${Color.success} : ${Color.danger}`,
               textAlign: 'center',
               fontSize: 18,
               fontWeight: 900,
-              marginBottom: 8
+              marginBottom: 8,
             }}
           >
-            Chuyển thành công
+            {currentTransaction?.status === TransactionStatus.Success
+              ? 'Chuyển thành công'
+              : 'Chuyển thất bại'}
           </Text>
-          <Text style={{ fontSize: 32, textAlign: 'center', marginBottom: 8}}>700,000 VND</Text>
+          <Text style={{ fontSize: 32, textAlign: 'center', marginBottom: 8 }}>
+            {formatNumberWithCommas(currentTransaction?.amount)}
+          </Text>
           <Text
             style={{
               fontSize: 18,
               textAlign: 'center',
               textTransform: 'uppercase',
               color: Color.boldBg,
-              marginBottom: 8
+              marginBottom: 8,
             }}
           >
-            nguoi nhan tien
+            {destinationAccount?.user.firstName}{' '}
+            {destinationAccount?.user.lastName}
           </Text>
-          <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between', marginBottom: 8 }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              width: '100%',
+              justifyContent: 'space-between',
+              marginBottom: 8,
+            }}
+          >
             <Text style={{ color: Color.subText }}>Nội dung:</Text>
-            <Text>NGUYEN VAN A chuyen tien</Text>
+            <Text>{currentTransaction?.description}</Text>
           </View>
-          <View style={{ flexDirection: 'row', width: '100%', justifyContent: 'space-between' }}>
+          <View
+            style={{
+              flexDirection: 'row',
+              width: '100%',
+              justifyContent: 'space-between',
+            }}
+          >
             <Text style={{ color: Color.subText }}>Thời gian:</Text>
-            <Text>14:20, 13/2/2025</Text>
+            <Text>{formatDateTime(currentTransaction?.createdDate)}</Text>
           </View>
         </View>
         {/* button controller */}

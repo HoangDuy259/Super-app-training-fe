@@ -85,6 +85,7 @@ export default env => {
               './store/slices': './src/store/slices/index.ts',
               './store/accountSlice': './src/store/slices/accountSlice',
               './store/transferSlice': './src/store/slices/transferSlice',
+              './store/transactionSlice': './src/store/slices/transactionSlice',
               './sagas': './src/sagas/index.ts',
             },
         remotes: {

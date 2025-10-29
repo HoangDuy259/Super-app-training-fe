@@ -4,16 +4,33 @@ import { BankAccount } from "./account.types";
 
 export interface Transaction {
   amount: number;
-  sourceAccountId: string;
-  destinationAccountId: string;
+  sourceAccountNumber: string;
+  destinationAccountNumber: string;
   transactionType: TransactionType;
   status: TransactionStatus;
   description: string;
+  createdDate: string;
+}
+
+export interface TransactionState {
+  transactions: Transaction[];
+  currentTransaction: Transaction | null;
+  loading: boolean,
+  error: string | null;
 }
 
 export interface TransferState {
   selectedAccount: BankAccount | null;
   destinationAccount: BankAccount | null;
+  amount: number;
+  note: string;
   loading: boolean;
   error: string | null;
+}
+
+export interface TransferRequest {
+  fromAccountId: string | null;
+  toAccountId: string | null;
+  amount: number;
+  description: string;
 }
