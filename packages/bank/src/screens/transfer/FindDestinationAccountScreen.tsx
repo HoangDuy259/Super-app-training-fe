@@ -15,7 +15,13 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { TransferStackParamsList } from '../../navigation/bank.types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../host/src/store/store';
-import { findDestinationAccountRequest } from '../../store/slices/transferSlice';
+import {
+  changeAmount,
+  changeNote,
+  findDestinationAccountRequest,
+} from '../../store/slices/transferSlice';
+import { remoteStorage } from '../../store/storage/remoteStorage';
+import {formatNumberWithCommas, parseNumberFromFormatted} from '../../utils/formatter'
 
 // MODAL OF CHOOSING ACCOUNT
 interface ChooseAccountModalProps {
@@ -114,7 +120,7 @@ const FindDestinationAccountScreen = ({
   // local state
   const [searchAccount, setSearchAccount] = useState<string>('');
   const [inputAmount, setInputAmount] = useState<string>('');
-  const [note, setNote] = useState<string>('Username chuyen tien');
+  const [note, setNote] = useState<string>('');
   const { height } = useWindowDimensions();
   const heightInfoAccountList = height * 0.15;
   const [focused, setFocused] = useState<boolean>(false);
@@ -122,7 +128,7 @@ const FindDestinationAccountScreen = ({
   const [showModal, setShowModal] = useState(false);
 
   // redux state
-  const { selectedAccount, destinationAccount } = useSelector(
+  const { selectedAccount, destinationAccount, loading } = useSelector(
     (state: RootState) => state.transferUI || {},
   );
 
@@ -132,10 +138,26 @@ const FindDestinationAccountScreen = ({
     console.log('[remote] des acc: ', destinationAccount);
   }, [destinationAccount]);
 
+  useEffect(() => {
+    const fetchUserInfo = async () => {
+      const userInfo = await remoteStorage.getUser();
+      setNote(`${userInfo?.firstName} ${userInfo?.lastName} chuyen tien`);
+    };
+    fetchUserInfo();
+  }, []);
+
   // handle find destination account
   const handleFindDestinationAccount = (accNum: string) => {
     setFoundAccount(true);
     dispatch(findDestinationAccountRequest(accNum));
+  };
+
+  // handle next step (confirm transfer information)
+  const handleConfirmTransferInfo = (note: string) => {
+    const amount = parseNumberFromFormatted(inputAmount);
+    dispatch(changeNote(note));
+    dispatch(changeAmount(amount));
+    navigation.navigate('ConfirmCode');
   };
 
   const styles = StyleSheet.create({
@@ -230,6 +252,8 @@ const FindDestinationAccountScreen = ({
     },
   });
 
+  if (loading) return <Text>Loading...</Text>;
+
   return (
     <SafeAreaView style={styles.container}>
       {/* header */}
@@ -248,7 +272,7 @@ const FindDestinationAccountScreen = ({
         <TouchableOpacity
           style={styles.btnClose}
           activeOpacity={0.7}
-          onPress={() => console.log('TouchableOpacity pressed')}
+          onPress={() => navigation.goBack()}
         >
           <Icon name="xmark" size={28} />
         </TouchableOpacity>
@@ -323,14 +347,13 @@ const FindDestinationAccountScreen = ({
           <TextInput
             placeholder="0 VND"
             value={inputAmount}
-            onChangeText={setInputAmount}
+            onChangeText={(text:string) => setInputAmount(formatNumberWithCommas(text))}
             keyboardType="numeric"
             autoFocus
             style={{
               color: Color.primaryText,
               fontSize: 24,
               textAlign: 'center',
-              // flex: 1,
             }}
           />
           <View style={styles.note}>
@@ -378,10 +401,7 @@ const FindDestinationAccountScreen = ({
           <TouchableOpacity
             activeOpacity={0.7}
             onPress={() => {
-              navigation.navigate('ConfirmCode', {
-                amount: parseInt(inputAmount),
-                toAccountId: 'ABC',
-              });
+              handleConfirmTransferInfo(note);
             }}
           >
             <Icon

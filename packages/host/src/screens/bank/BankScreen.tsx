@@ -25,9 +25,13 @@ const BankScreen = () => {
         const { default: transferReducer } = await import(
           'bank/store/transferSlice'
         );
+        const { default: transactionSlice } = await import(
+          'bank/store/transactionSlice'
+        );
         const { bankSaga } = await import('bank/sagas');
         injectReducer('accountUI', accountReducer);
         injectReducer('transferUI', transferReducer);
+        injectReducer('transactionUI', transactionSlice);
         runSaga(bankSaga);
         console.log('[Host] Bank Redux injected SUCCESS!');
         setIsReady(true);

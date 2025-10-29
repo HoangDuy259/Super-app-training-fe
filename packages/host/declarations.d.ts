@@ -14,6 +14,7 @@ declare module 'bank/screens/account/AccountScreen';
 // slices:
 declare module 'bank/store/transferSlice'
 declare module 'bank/store/accountSlice'
+declare module 'bank/store/transactionSlice'
 // sagas:
 declare module 'bank/sagas'
 // thêm các module khác ở đây

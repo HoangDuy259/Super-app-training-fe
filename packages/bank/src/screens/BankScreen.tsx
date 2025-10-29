@@ -72,6 +72,12 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
     initBankData();
   }, [dispatch]);
 
+  useEffect(() => {
+    if (accounts && accounts.length > 0) {
+      dispatch(selectAccount(accounts[0]));
+    }
+  }, [accounts]);
+
   // handle expiration of access token
   // useEffect(() => {
 
@@ -112,8 +118,6 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   }, [selectedAccount]);
 
   if (loading) {
-    console.log('account in screen: ', accounts);
-
     return <Text>LOADING ACCOUNTS....</Text>;
   }
   const styles = StyleSheet.create({

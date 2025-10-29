@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -11,15 +11,42 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { TransferStackParamsList } from '../../navigation/bank.types';
+import { useDispatch, useSelector } from 'react-redux';
+import { RootState } from '../../../../host/src/store/store';
+import { bankApi } from '../../api/bankApi';
+import { TransferRequest } from '../../../../shared-types';
+import { createTransactionRequest } from '../../store/slices/transactionSlice';
+import {formatNumberWithCommas, parseNumberFromFormatted} from '../../utils/formatter'
 
 
-type ConfirmCodeScreenNavigationProp = StackNavigationProp<TransferStackParamsList, 'ConfirmCode'>
+type ConfirmCodeScreenNavigationProp = StackNavigationProp<
+  TransferStackParamsList,
+  'ConfirmCode'
+>;
 
 interface ConfirmCodeScreenProps {
-  navigation: ConfirmCodeScreenNavigationProp
+  navigation: ConfirmCodeScreenNavigationProp;
 }
 
 const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
+  // redux state
+  const { loading, selectedAccount, destinationAccount, amount, note } =
+    useSelector((state: RootState) => state.transferUI || {});
+
+  const dispatch = useDispatch();
+
+  // handle confirm
+  const handleAccept = () => {
+    const data: TransferRequest = {
+      fromAccountId: selectedAccount?.id || null,
+      toAccountId: destinationAccount?.id || null,
+      amount: amount,
+      description: note,
+    };
+    dispatch(createTransactionRequest(data));
+    navigation.navigate('TransactionStatus');
+  };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -57,7 +84,7 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
       left: 0,
       right: 0,
       justifyContent: 'space-between',
-      paddingHorizontal: 8
+      paddingHorizontal: 8,
     },
     btnAccept: {
       backgroundColor: Color.boldBg,
@@ -73,6 +100,9 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
       marginRight: 4,
     },
   });
+
+  if (loading) return <Text>Đang loading...</Text>;
+
   return (
     <SafeAreaView style={styles.container}>
       {/* header */}
@@ -91,9 +121,12 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
             <Icon name="building-columns" size={42} />
             <View style={{ marginLeft: 12 }}>
               <Text style={{ marginBottom: 8, fontSize: 18 }}>Bank name</Text>
-              <Text style={{ marginBottom: 8, fontSize: 18 }}>10001728322</Text>
+              <Text style={{ marginBottom: 8, fontSize: 18 }}>
+                {destinationAccount?.accountNumber}
+              </Text>
               <Text style={{ textTransform: 'uppercase', fontSize: 18 }}>
-                nguyen van a
+                {destinationAccount?.user.firstName}{' '}
+                {destinationAccount?.user.lastName}
               </Text>
             </View>
           </View>
@@ -106,7 +139,7 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
             >
               Số tiền:
             </Text>
-            <Text style={{ fontSize: 42, textAlign: 'center' }}>100,000</Text>
+            <Text style={{ fontSize: 42, textAlign: 'center' }}>{formatNumberWithCommas(amount)}</Text>
           </View>
           <View>
             <Text
@@ -114,13 +147,18 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
             >
               Nội dung:
             </Text>
-            <Text style={{ fontSize: 24 }}>Duong tien sinh chuyen tien</Text>
+            <Text style={{ fontSize: 24 }}>{note}</Text>
           </View>
         </View>
 
         {/* button controller */}
         <View style={styles.btnControllerContainer}>
-          <TouchableOpacity style={styles.btnCancel} onPress={() => {navigation.goBack()}}>
+          <TouchableOpacity
+            style={styles.btnCancel}
+            onPress={() => {
+              navigation.goBack();
+            }}
+          >
             <Text
               style={{
                 color: Color.whiteText,
@@ -131,7 +169,12 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
               Hủy bỏ
             </Text>
           </TouchableOpacity>
-          <TouchableOpacity style={styles.btnAccept} onPress={() => {navigation.navigate('TransactionStatus', {success: true, transactionId: 'abc'})}}>
+          <TouchableOpacity
+            style={styles.btnAccept}
+            onPress={() => {
+              handleAccept();
+            }}
+          >
             <Text
               style={{
                 color: Color.whiteText,

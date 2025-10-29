@@ -4,6 +4,8 @@ import { TransferState, BankAccount } from '../../../../shared-types';
 const initialState: TransferState = {
   selectedAccount: null,
   destinationAccount: null,
+  amount: 0,
+  note: '',
   loading: false,
   error: null,
 };
@@ -12,12 +14,22 @@ const transferSlice = createSlice({
   name: 'transfer',
   initialState,
   reducers: {
+    // select account
     selectAccount(state, action: PayloadAction<BankAccount>) {
       state.selectedAccount = action.payload;
     },
 
     selectDestinationAccount(state, action: PayloadAction<BankAccount>) {
       state.destinationAccount = action.payload;
+    },
+
+    // edit note and amount
+    changeNote(state, action: PayloadAction<string>) {
+      state.note = action.payload;
+    },
+
+    changeAmount(state, action: PayloadAction<number>) {
+      state.amount = action.payload
     },
 
     // find beneficiary account
@@ -40,6 +52,8 @@ const transferSlice = createSlice({
 export const {
   selectAccount,
   selectDestinationAccount,
+  changeAmount,
+  changeNote,
   findDestinationAccountRequest,
   findDestinationAccountSuccess,
   findDestinationAccountFailure,
