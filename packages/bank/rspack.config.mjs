@@ -70,6 +70,7 @@ export default env => {
               './screens/BankScreen': './src/screens/BankScreen',
               // account
               './screens/AccountScreen': './src/screens/account/AccountScreen',
+              './screens/AccountDetailScreen': './src/screens/account/AccountDetailScreen',
               // transfer
               './screens/ChooseBankScreen':
                 './src/screens/transfer/ChooseBankScreen',

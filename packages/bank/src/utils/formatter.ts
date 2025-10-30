@@ -28,3 +28,14 @@ export const formatNumberWithCommas = (value: string | number | undefined): stri
 export const parseNumberFromFormatted = (value: string): number => {
   return Number(value.replace(/,/g, '')) || 0;
 };
+
+// Helper: format tiền
+export const formatCurrency = (amount: number) => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(amount);
+};
+
+export const formatDate = (iso: string) => new Date(iso).toLocaleDateString('vi-VN');
+export const formatTime = (iso: string) => new Date(iso).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });

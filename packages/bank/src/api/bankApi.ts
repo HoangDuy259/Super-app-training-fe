@@ -1,4 +1,8 @@
-import { BankAccount, Transaction, TransferRequest } from '../../../shared-types';
+import {
+  BankAccount,
+  Transaction,
+  TransferRequest,
+} from '../../../shared-types';
 import apiClient from './apiClient';
 
 export const bankApi = {
@@ -31,12 +35,30 @@ export const bankApi = {
     return response.data.result || {};
   },
 
-  // transfer 
+  // transfer
   async transfer(data: TransferRequest): Promise<Transaction> {
     const response = await apiClient.post<{
       message: string;
       result: Transaction;
     }>(`bank-transaction/transfer`, data);
     return response.data.result;
-  }
+  },
+
+  // lock account
+  async lockAccount(accountId: string): Promise<BankAccount> {
+    const response = await apiClient.patch<{
+      message: string;
+      result: BankAccount;
+    }>(`bank-accounts/${accountId}/lock`);
+    return response.data.result;
+  },
+
+  // unlock account
+  async unlockAccount(accountId: string): Promise<BankAccount> {
+    const response = await apiClient.patch<{
+      message: string;
+      result: BankAccount;
+    }>(`bank-accounts/${accountId}/unlock`);
+    return response.data.result;
+  },
 };

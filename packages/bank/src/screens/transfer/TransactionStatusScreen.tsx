@@ -155,7 +155,7 @@ const TransactionStatusScreen = ({
           <TouchableOpacity
             style={styles.btnHistory}
             onPress={() => {
-              navigation.navigate('TransactionHistory', { accountId: '' });
+              navigation.navigate('TransactionHistory');
             }}
           >
             <Text

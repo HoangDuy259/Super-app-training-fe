@@ -322,7 +322,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               <TouchableOpacity
                 style={styles.buttonController}
                 activeOpacity={0.7}
-                onPress={() => console.log('TouchableOpacity pressed')}
+                onPress={() => navigation.navigate('TransactionHistory')}
               >
                 <View style={styles.buttonControllerIcon}>
                   <Icon
@@ -346,7 +346,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               <TouchableOpacity
                 style={styles.buttonController}
                 activeOpacity={0.7}
-                onPress={() => console.log('TouchableOpacity pressed')}
+                onPress={() => navigation.navigate('AccountDetail')}
               >
                 <View style={styles.buttonControllerIcon}>
                   <Icon name="info" size={32} color={Color.whiteText} />

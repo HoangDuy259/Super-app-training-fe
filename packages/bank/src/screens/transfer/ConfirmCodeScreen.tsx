@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import {
+  Alert,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -16,8 +17,10 @@ import { RootState } from '../../../../host/src/store/store';
 import { bankApi } from '../../api/bankApi';
 import { TransferRequest } from '../../../../shared-types';
 import { createTransactionRequest } from '../../store/slices/transactionSlice';
-import {formatNumberWithCommas, parseNumberFromFormatted} from '../../utils/formatter'
-
+import {
+  formatNumberWithCommas,
+  parseNumberFromFormatted,
+} from '../../utils/formatter';
 
 type ConfirmCodeScreenNavigationProp = StackNavigationProp<
   TransferStackParamsList,
@@ -36,7 +39,7 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
   const dispatch = useDispatch();
 
   // handle confirm
-  const handleAccept = () => {
+  const acceptAction = () => {
     const data: TransferRequest = {
       fromAccountId: selectedAccount?.id || null,
       toAccountId: destinationAccount?.id || null,
@@ -45,6 +48,24 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
     };
     dispatch(createTransactionRequest(data));
     navigation.navigate('TransactionStatus');
+  };
+
+  const handleAccept = () => {
+    Alert.alert(
+      'Xác nhận đăng xuất',
+      'Bạn có chắc muốn đăng xuất không?',
+      [
+        { text: 'Hủy', style: 'cancel' },
+        {
+          text: 'Xác nhận',
+          style: 'destructive',
+          onPress: () => {
+            acceptAction;
+          },
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   const styles = StyleSheet.create({
@@ -139,7 +160,9 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
             >
               Số tiền:
             </Text>
-            <Text style={{ fontSize: 42, textAlign: 'center' }}>{formatNumberWithCommas(amount)}</Text>
+            <Text style={{ fontSize: 42, textAlign: 'center' }}>
+              {formatNumberWithCommas(amount)}
+            </Text>
           </View>
           <View>
             <Text

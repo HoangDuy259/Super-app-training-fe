@@ -6,6 +6,7 @@ export interface BankAccount {
   accountNumber: string;
   balance: number;
   status: AccountStatus;
+  createdDate: string;
   user: UserInfo;
 }
 

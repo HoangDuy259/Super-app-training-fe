@@ -14,16 +14,11 @@ function* fetchTransactionsByAccountId(
   action: ReturnType<typeof fetchTransactionsRequest>,
 ): SagaIterator {
   try {
-    const accNum = action.payload;
-    const destinationAccount = yield call(
-      bankApi.findDestinationAccount,
-      accNum,
-    );
-    console.log('[saga] des acc: ', destinationAccount);
-    yield put(fetchTransactionsSuccess(destinationAccount));
+    const response = yield call(bankApi.getTransactionsByAccountId, action.payload);
+    yield put(fetchTransactionsSuccess(response));
   } catch (error: any) {
-    console.log('[saga] failed: ', error);
-    yield put(fetchTransactionsFailure(error));
+    console.log('saga error',error);
+    yield put(createTransactionFailure(error));
   }
 }
 
