@@ -21,3 +21,4 @@ declare module 'bank/sagas'
 
 // screen account:
 declare module 'bank/screens/AccountScreen'
+declare module 'bank/screens/AccountDetailScreen'

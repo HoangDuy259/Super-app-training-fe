@@ -3,8 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 // import BankNavigation from '../../../bank/src/navigation/BankNavigation';
 import StockScreen from '../screens/StockScreen';
-import AccountScreen from '../screens/AccountScreen';
 import BankScreen from '../screens/bank/BankScreen';
+import AccountScreen from '../screens/bank/account/AccountScreen'
 
 export type MainTabParamsList = {
   Home: undefined;
@@ -50,7 +50,7 @@ const MainNavigation = () => {
       />
       <Tab.Screen
         name="Portfolio"
-        component={AccountScreen}
+        component={StockScreen}
         options={{
           tabBarLabel: 'Danh mục',
           tabBarIcon: ({ focused }) => (

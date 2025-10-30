@@ -267,7 +267,7 @@ const FindDestinationAccountScreen = ({
             fontSize: 20,
           }}
         >
-          tìm tài khoản đích
+          tìm tài thụ hưởng
         </Text>
         <TouchableOpacity
           style={styles.btnClose}

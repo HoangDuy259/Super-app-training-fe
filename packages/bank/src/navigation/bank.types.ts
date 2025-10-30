@@ -1,7 +1,8 @@
 export type BankStackParamsList = {
   Bank: undefined;
+  AccountDetail: undefined;
   Account: { accountId: string };
-  TransactionHistory: { accountId: string };
+  TransactionHistory: undefined;
   TransferFlow: undefined;
 };
 

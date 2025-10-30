@@ -3,7 +3,6 @@ import Placeholder from '../../components/Placeholder';
 import ErrorBoundary from '../../components/ErrorBoundary';
 import { injectReducer, runSaga } from '../../store/store';
 
-console.log('[Host] Importing Bank remote...');
 const RemoteBankNavigation = React.lazy(
   () => import('bank/navigation/BankNavigation'),
 );
@@ -15,10 +14,6 @@ const BankScreen = () => {
     async function initBankModule() {
       try {
         console.log('[Host] Loading Bank Redux Module...');
-        // const { default: bankReducer } = await import('bank/store/bankSlice');
-        // const { bankSaga } = await import('bank/sagas/bankSaga');
-        // injectReducer('bank', bankReducer);
-        // runSaga(bankSaga);
         const { default: accountReducer } = await import(
           'bank/store/accountSlice'
         );
