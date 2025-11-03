@@ -11,7 +11,13 @@ export interface BankAccount {
 }
 
 export interface AccountUIState {
+  currentAccount: BankAccount | null;
   accounts: BankAccount[];
   loading: boolean;
   error: string | null;
+}
+
+export interface HandleStatusRequest {
+  account: BankAccount | null;
+  status: AccountStatus | undefined;
 }

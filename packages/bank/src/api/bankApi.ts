@@ -1,4 +1,5 @@
 import {
+  AuthenticateRequest,
   BankAccount,
   Transaction,
   TransferRequest,
@@ -37,6 +38,8 @@ export const bankApi = {
 
   // transfer
   async transfer(data: TransferRequest): Promise<Transaction> {
+    console.log('[api] data: ', data);
+    
     const response = await apiClient.post<{
       message: string;
       result: Transaction;
@@ -61,4 +64,12 @@ export const bankApi = {
     }>(`bank-accounts/${accountId}/unlock`);
     return response.data.result;
   },
+
+  // authenticate account
+  async authenticateTransfer(data: AuthenticateRequest): Promise<boolean> {
+    const response = await apiClient.post(`auth/login`, data);
+    console.log('[api] res: ', response);
+    
+    return response.status === 200;
+  }
 };

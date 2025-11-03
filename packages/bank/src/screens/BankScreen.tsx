@@ -21,7 +21,8 @@ import { UserInfo } from '../../../shared-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../host/src/store/store';
 import { getAccountRequest } from '../store/slices/accountSlice';
-import { selectAccount } from '../store/slices/transferSlice';
+import { selectAccount } from '../store/slices/accountSlice';
+import { clearDestinationAccount } from '../store/slices/transferSlice';
 
 type BankScreenNavigationProp = StackNavigationProp<
   BankStackParamsList,
@@ -41,9 +42,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   const { accounts, loading } = useSelector(
     (state: RootState) => state.accountUI || {},
   );
-  const { selectedAccount } = useSelector(
-    (state: RootState) => state.transferUI,
-  );
+  const { currentAccount } = useSelector((state: RootState) => state.accountUI);
 
   console.log('[REMOTE] BankScreen RENDERED!');
 
@@ -71,6 +70,10 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
 
     initBankData();
   }, [dispatch]);
+
+  useEffect(() => {
+    dispatch(clearDestinationAccount());
+  }, []);
 
   useEffect(() => {
     if (accounts && accounts.length > 0) {
@@ -114,8 +117,8 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   };
 
   useEffect(() => {
-    console.log('[remote] selected acc: ', selectedAccount);
-  }, [selectedAccount]);
+    console.log('[remote] selected acc: ', currentAccount);
+  }, [currentAccount]);
 
   if (loading) {
     return <Text>LOADING ACCOUNTS....</Text>;

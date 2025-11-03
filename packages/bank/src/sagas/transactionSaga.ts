@@ -7,6 +7,7 @@ import {
   fetchTransactionsRequest,
   fetchTransactionsSuccess,
   fetchTransactionsFailure,
+  // authenticateTransferRequest,
 } from '../store/slices/transactionSlice';
 import type { SagaIterator } from 'redux-saga';
 
@@ -14,10 +15,13 @@ function* fetchTransactionsByAccountId(
   action: ReturnType<typeof fetchTransactionsRequest>,
 ): SagaIterator {
   try {
-    const response = yield call(bankApi.getTransactionsByAccountId, action.payload);
+    const response = yield call(
+      bankApi.getTransactionsByAccountId,
+      action.payload,
+    );
     yield put(fetchTransactionsSuccess(response));
   } catch (error: any) {
-    console.log('saga error',error);
+    console.log('saga error', error);
     yield put(createTransactionFailure(error));
   }
 }
@@ -26,11 +30,20 @@ function* createTransaction(
   action: ReturnType<typeof createTransactionRequest>,
 ): SagaIterator {
   try {
-    const response = yield call(bankApi.transfer, action.payload);
-    yield put(createTransactionSuccess(response));
+    const { auth, transfer } = action.payload;
+
+    const isVerified: boolean = yield call(bankApi.authenticateTransfer, auth);
+    
+    if (!isVerified) {
+      console.log('[saga] xác thực thất bại');
+      yield put(createTransactionFailure('Xác thực thất bại'));
+      return;
+    }
+    
+    const result = yield call(bankApi.transfer, transfer);
+    yield put(createTransactionSuccess(result));
   } catch (error: any) {
-    console.log(error);
-    yield put(createTransactionFailure(error));
+    yield put(createTransactionFailure(error.message));
   }
 }
 

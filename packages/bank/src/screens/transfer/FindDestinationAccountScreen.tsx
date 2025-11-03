@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Modal,
   SafeAreaView,
   StyleSheet,
@@ -21,7 +22,10 @@ import {
   findDestinationAccountRequest,
 } from '../../store/slices/transferSlice';
 import { remoteStorage } from '../../store/storage/remoteStorage';
-import {formatNumberWithCommas, parseNumberFromFormatted} from '../../utils/formatter'
+import {
+  formatNumberWithCommas,
+  parseNumberFromFormatted,
+} from '../../utils/formatter';
 
 // MODAL OF CHOOSING ACCOUNT
 interface ChooseAccountModalProps {
@@ -128,9 +132,10 @@ const FindDestinationAccountScreen = ({
   const [showModal, setShowModal] = useState(false);
 
   // redux state
-  const { selectedAccount, destinationAccount, loading } = useSelector(
+  const { destinationAccount, loading } = useSelector(
     (state: RootState) => state.transferUI || {},
   );
+  const { currentAccount } = useSelector((state: RootState) => state.accountUI);
 
   // hooks
   const dispatch = useDispatch();
@@ -155,6 +160,22 @@ const FindDestinationAccountScreen = ({
   // handle next step (confirm transfer information)
   const handleConfirmTransferInfo = (note: string) => {
     const amount = parseNumberFromFormatted(inputAmount);
+    if (!amount || amount < 1000) {
+      Alert.alert(
+        'Thiếu thông tin',
+        'Vui lòng nhập số tiền, tối thiểu 1000 vnđ',
+        [{ text: 'OK' }],
+      );
+      return;
+    }
+    if (!destinationAccount) {
+      Alert.alert(
+        'Thiếu thông tin',
+        'Vui lòng chọn tài khoản thụ hưởng',
+        [{ text: 'OK' }],
+      );
+      return;
+    }
     dispatch(changeNote(note));
     dispatch(changeAmount(amount));
     navigation.navigate('ConfirmCode');
@@ -287,8 +308,8 @@ const FindDestinationAccountScreen = ({
           >
             <Icon name="building-columns" size={32} />
             <View style={styles.infoDetail}>
-              <Text>Nguồn tiền: {selectedAccount?.accountNumber}</Text>
-              <Text>Số dư: {selectedAccount?.balance}</Text>
+              <Text>Nguồn tiền: {currentAccount?.accountNumber}</Text>
+              <Text>Số dư: {currentAccount?.balance}</Text>
             </View>
             <Icon name="angle-right" size={24} />
           </TouchableOpacity>
@@ -347,7 +368,9 @@ const FindDestinationAccountScreen = ({
           <TextInput
             placeholder="0 VND"
             value={inputAmount}
-            onChangeText={(text:string) => setInputAmount(formatNumberWithCommas(text))}
+            onChangeText={(text: string) =>
+              setInputAmount(formatNumberWithCommas(text))
+            }
             keyboardType="numeric"
             autoFocus
             style={{
