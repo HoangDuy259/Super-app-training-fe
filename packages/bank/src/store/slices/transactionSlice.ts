@@ -1,7 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TransactionState, Transaction, TransferRequest, AuthenticateRequest, CreateTransactionPayload } from '../../../../shared-types';
+import {
+  TransactionState,
+  Transaction,
+  TransferRequest,
+  // AuthenticateRequest,
+  // CreateTransactionPayload,
+  LoginPayload,
+} from '../../../../shared-types';
 
 const initialState: TransactionState = {
+  isVerified: false,
   loading: false,
   error: null,
   transactions: [],
@@ -13,7 +21,7 @@ const transactionSlice = createSlice({
   initialState,
   reducers: {
     // create transaction
-    createTransactionRequest(state, action: PayloadAction<CreateTransactionPayload>) {
+    createTransactionRequest(state, action: PayloadAction<TransferRequest>) {
       state.loading = true;
     },
     createTransactionSuccess(state, action: PayloadAction<Transaction>) {
@@ -40,10 +48,23 @@ const transactionSlice = createSlice({
       state.error = action.payload;
     },
 
-    // authenticate
-    // authenticateTransferRequest(state, action: PayloadAction<CreateTransactionPayload>){
-    //   state.loading = true;
-    // }
+    verifyTransferRequest(state, action: PayloadAction<LoginPayload>) {
+      state.loading = true;
+    },
+    verifyTransferSuccess(state, action: PayloadAction<boolean>) {
+      state.loading = false;
+      state.isVerified = action.payload;
+    },
+    verifyTransferFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    resetState(state) {
+      state.currentTransaction = null;
+      state.error = null;
+      state.isVerified = false;
+      state.loading = false;
+    },
   },
 });
 
@@ -54,6 +75,9 @@ export const {
   fetchTransactionsRequest,
   fetchTransactionsSuccess,
   fetchTransactionsFailure,
-  // authenticateTransferRequest
+  verifyTransferRequest,
+  verifyTransferSuccess,
+  verifyTransferFailure,
+  resetState,
 } = transactionSlice.actions;
 export default transactionSlice.reducer;

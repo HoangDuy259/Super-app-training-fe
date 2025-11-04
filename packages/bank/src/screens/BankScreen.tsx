@@ -43,6 +43,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
     (state: RootState) => state.accountUI || {},
   );
   const { currentAccount } = useSelector((state: RootState) => state.accountUI);
+  const { currentTransaction } = useSelector((state: RootState) => state.transactionUI);
 
   console.log('[REMOTE] BankScreen RENDERED!');
 
@@ -118,6 +119,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
 
   useEffect(() => {
     console.log('[remote] selected acc: ', currentAccount);
+    console.log('[remote] current transaction: ', currentTransaction);
   }, [currentAccount]);
 
   if (loading) {

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {
+  ForgotPassword,
   LoginPayload,
   LoginResponse,
   SignupPayload,
@@ -69,4 +70,25 @@ export const getUserInfo = async (accessToken: string): Promise<UserInfo> => {
     email: rs.email,
     username: rs.username,
   };
+};
+
+// send otp
+export const sendOtp = async (email: string): Promise<boolean> => {
+  console.log('[api] called');
+
+  const res = await axios.post(`${API_URL}/auth/request-otp?email=${email}`);
+  console.log('[api] res: ', res);
+
+  return res.status === 200;
+};
+// change password
+export const changePassword = async (
+  data: ForgotPassword,
+): Promise<boolean> => {
+  console.log('[api] called', data);
+  const {email, otp, newPassword} = data
+  const res = await axios.post(`${API_URL}/auth/reset`, data);
+  console.log('[api] res: ', res);
+
+  return res.status === 200;
 };

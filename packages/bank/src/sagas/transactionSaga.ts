@@ -7,6 +7,9 @@ import {
   fetchTransactionsRequest,
   fetchTransactionsSuccess,
   fetchTransactionsFailure,
+  verifyTransferRequest,
+  verifyTransferSuccess,
+  verifyTransferFailure,
   // authenticateTransferRequest,
 } from '../store/slices/transactionSlice';
 import type { SagaIterator } from 'redux-saga';
@@ -30,24 +33,26 @@ function* createTransaction(
   action: ReturnType<typeof createTransactionRequest>,
 ): SagaIterator {
   try {
-    const { auth, transfer } = action.payload;
-
-    const isVerified: boolean = yield call(bankApi.authenticateTransfer, auth);
     
-    if (!isVerified) {
-      console.log('[saga] xác thực thất bại');
-      yield put(createTransactionFailure('Xác thực thất bại'));
-      return;
-    }
-    
-    const result = yield call(bankApi.transfer, transfer);
+    const result = yield call(bankApi.transfer, action.payload);
     yield put(createTransactionSuccess(result));
   } catch (error: any) {
     yield put(createTransactionFailure(error.message));
   }
 }
 
+function* verifyTransferSaga(action: ReturnType<typeof verifyTransferRequest>): SagaIterator {
+  try {
+    const result: boolean = yield call(bankApi.authenticateTransfer, action.payload);
+    yield put(verifyTransferSuccess(result));
+  } catch (error: any) {
+    yield put(verifyTransferFailure(error.message || 'Xác thực thất bại'));
+  }
+}
+
+
 export default function* transferSaga() {
   yield takeLatest(fetchTransactionsRequest.type, fetchTransactionsByAccountId);
   yield takeLatest(createTransactionRequest.type, createTransaction);
+  yield takeLatest(verifyTransferRequest.type, verifyTransferSaga);
 }

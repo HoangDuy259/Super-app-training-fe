@@ -58,12 +58,32 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
       <TextInput
         value={password}
         onChangeText={setPassword}
-        style={[styles.input, focusedInput === 'password' && styles.focusedInput]}
+        style={[
+          styles.input,
+          focusedInput === 'password' && styles.focusedInput,
+        ]}
         placeholder="Mật khẩu"
         secureTextEntry
         onFocus={() => setFocusedInput('password')}
         onBlur={() => setFocusedInput(null)}
       />
+      <View style={{ justifyContent: 'flex-end', flexDirection: 'row', width: '100%'}}>
+        <TouchableOpacity
+          style={{
+            position: 'relative',
+            paddingVertical: 8,
+            flexDirection: 'row',
+            justifyContent: 'flex-end',
+          }}
+          onPress={() => navigation.navigate('ForgotPassword')}
+        >
+          <Text
+            style={{ color: Color.boldBg, textDecorationLine: 'underline' }}
+          >
+            Quên mật khẩu
+          </Text>
+        </TouchableOpacity>
+      </View>
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text style={styles.buttonText}>Đăng nhập</Text>
       </TouchableOpacity>

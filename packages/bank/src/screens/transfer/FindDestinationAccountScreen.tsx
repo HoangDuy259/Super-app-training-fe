@@ -128,7 +128,6 @@ const FindDestinationAccountScreen = ({
   const { height } = useWindowDimensions();
   const heightInfoAccountList = height * 0.15;
   const [focused, setFocused] = useState<boolean>(false);
-  const [foundAccount, setFoundAccount] = useState<boolean>(false);
   const [showModal, setShowModal] = useState(false);
 
   // redux state
@@ -153,7 +152,6 @@ const FindDestinationAccountScreen = ({
 
   // handle find destination account
   const handleFindDestinationAccount = (accNum: string) => {
-    setFoundAccount(true);
     dispatch(findDestinationAccountRequest(accNum));
   };
 
@@ -169,11 +167,9 @@ const FindDestinationAccountScreen = ({
       return;
     }
     if (!destinationAccount) {
-      Alert.alert(
-        'Thiếu thông tin',
-        'Vui lòng chọn tài khoản thụ hưởng',
-        [{ text: 'OK' }],
-      );
+      Alert.alert('Thiếu thông tin', 'Vui lòng chọn tài khoản thụ hưởng', [
+        { text: 'OK' },
+      ]);
       return;
     }
     dispatch(changeNote(note));
@@ -224,7 +220,9 @@ const FindDestinationAccountScreen = ({
     },
 
     infoDetail: {
-      marginLeft: 12,
+      marginLeft: 20,
+      flex: 1,
+      alignItems: 'flex-start',
     },
 
     searchContainer: {
@@ -262,7 +260,16 @@ const FindDestinationAccountScreen = ({
       flexDirection: 'column',
     },
 
-    note: {},
+    inputInfo: {
+      color: Color.primaryText,
+      fontSize: 24,
+      textAlign: 'center',
+      borderColor: Color.boldLine,
+      borderWidth: 1,
+      borderRadius: 8,
+      marginVertical: 12,
+      paddingHorizontal: 12
+    },
 
     btnNext: {
       marginLeft: 8,
@@ -309,25 +316,35 @@ const FindDestinationAccountScreen = ({
             <Icon name="building-columns" size={32} />
             <View style={styles.infoDetail}>
               <Text>Nguồn tiền: {currentAccount?.accountNumber}</Text>
-              <Text>Số dư: {currentAccount?.balance}</Text>
+              <Text>
+                Số dư: {formatNumberWithCommas(currentAccount?.balance)}
+              </Text>
             </View>
             <Icon name="angle-right" size={24} />
           </TouchableOpacity>
           <View style={{ borderWidth: 0.5 }}></View>
           <TouchableOpacity style={styles.infoAccountItem}>
             <Icon name="building-columns" size={32} />
-            {!foundAccount && (
+            {!destinationAccount && (
               <View style={styles.infoDetail}>
-                <Text>Tên ngân hàng nhận</Text>
+                <Text>Chưa có tài khoản thụ hưởng</Text>
               </View>
             )}
-            {foundAccount && (
+            {destinationAccount && destinationAccount?.status === 'ACTIVE' && (
               <View style={styles.infoDetail}>
                 <Text>Tài khoản nhận: {destinationAccount?.accountNumber}</Text>
                 <Text>Tên ngân hàng nhận</Text>
                 <Text>
                   {destinationAccount?.user.firstName}{' '}
                   {destinationAccount?.user.lastName}
+                </Text>
+              </View>
+            )}
+            {destinationAccount && destinationAccount?.status !== 'ACTIVE' && (
+              <View style={styles.infoDetail}>
+                <Text>Tài khoản nhận: {destinationAccount?.accountNumber}</Text>
+                <Text style={{ color: Color.danger }}>
+                  Tài khoản đang bị khóa
                 </Text>
               </View>
             )}
@@ -365,6 +382,8 @@ const FindDestinationAccountScreen = ({
         </View>
         {/* input amount */}
         <View style={styles.inputContainer}>
+          <Text style={{ color: Color.subText, marginTop: 20 }}>Số tiền: </Text>
+
           <TextInput
             placeholder="0 VND"
             value={inputAmount}
@@ -373,13 +392,10 @@ const FindDestinationAccountScreen = ({
             }
             keyboardType="numeric"
             autoFocus
-            style={{
-              color: Color.primaryText,
-              fontSize: 24,
-              textAlign: 'center',
-            }}
+            style={styles.inputInfo}
           />
-          <View style={styles.note}>
+          <Text style={{ color: Color.subText }}>Nội dung: </Text>
+          <View style={styles.inputInfo}>
             <TextInput
               placeholder={note}
               value={note}
@@ -423,6 +439,7 @@ const FindDestinationAccountScreen = ({
           {/* button next */}
           <TouchableOpacity
             activeOpacity={0.7}
+            disabled={destinationAccount?.status === 'INACTIVE'}
             onPress={() => {
               handleConfirmTransferInfo(note);
             }}

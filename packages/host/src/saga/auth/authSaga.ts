@@ -16,8 +16,17 @@ import {
   signupSuccess,
   signupFailure,
   logoutRequest,
+  sendOtpRequest,
+  changePasswordRequest
 } from './authSlice';
-import { login, signup, refreshAccessToken, getUserInfo } from '../../api/auth';
+import {
+  login,
+  signup,
+  refreshAccessToken,
+  getUserInfo,
+  sendOtp,
+  changePassword,
+} from '../../api/auth';
 import { RootState } from '../../store/store';
 import { Alert } from 'react-native';
 import type { SagaIterator } from 'redux-saga';
@@ -34,9 +43,7 @@ function* handleLogin(action: ReturnType<typeof loginRequest>): SagaIterator {
     const user = yield call(getUserInfo, tokens.accessToken);
     // console.log('user in saga: ',user);
     yield call(hostSession.setUser, user);
-    yield put(
-      loginSuccess(),
-    );
+    yield put(loginSuccess());
   } catch (error: any) {
     console.log('Login failed:', error.message);
     Alert.alert('Error', error.message || 'An unexpected error occurred');
@@ -49,7 +56,6 @@ function* handleSignup(action: ReturnType<typeof signupRequest>) {
   try {
     yield call(signup, action.payload);
     yield put(signupSuccess());
-
   } catch (error: any) {
     console.log('Sign up failed:', error.message);
     // showError(error.message);
@@ -57,9 +63,29 @@ function* handleSignup(action: ReturnType<typeof signupRequest>) {
   }
 }
 
+function* sendOtpSaga(action: ReturnType<typeof sendOtpRequest>) {
+  try {
+    yield call(sendOtp, action.payload);
+  } catch (error: any) {
+    console.log('send otp failed:', error.message);
+  }
+}
+
+function* changePasswordSaga(action: ReturnType<typeof changePasswordRequest>) {
+  try {
+    console.log('[saga] change pass called');
+    
+    yield call(changePassword, action.payload);
+  } catch (error: any) {
+    console.log('change password failed:', error.message);
+  }
+}
+
 function* watchAuth() {
   yield takeLatest(loginRequest.type, handleLogin);
   yield takeLatest(signupRequest.type, handleSignup);
+  yield takeLatest(sendOtpRequest.type, sendOtpSaga);
+  yield takeLatest(changePasswordRequest.type, changePasswordSaga);
 }
 
 // Xử lý tự động log out khi access token đã hết hạn
@@ -82,9 +108,7 @@ function* watchAccessTokenExpiry(): SagaIterator {
         const newTokens = yield call(refreshAccessToken, refreshToken);
         yield call(hostSession.setTokens, newTokens);
 
-        yield put(
-          loginSuccess()
-        );
+        yield put(loginSuccess());
 
         // 🔹 Bắn event để các remote cập nhật token
         eventBus.emit('TOKEN_UPDATED', newTokens);

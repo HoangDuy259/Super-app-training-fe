@@ -13,6 +13,7 @@ export interface Transaction {
 }
 
 export interface TransactionState {
+  isVerified: boolean,
   transactions: Transaction[];
   currentTransaction: Transaction | null;
   loading: boolean,
@@ -40,7 +41,7 @@ export interface AuthenticateRequest {
   password: string | null;
 }
 
-export interface CreateTransactionPayload {
-  auth: AuthenticateRequest;
-  transfer: TransferRequest;
-}
+// export interface CreateTransactionPayload {
+//   auth: AuthenticateRequest;
+//   transfer: TransferRequest;
+// }

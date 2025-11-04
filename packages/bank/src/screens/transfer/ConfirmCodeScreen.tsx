@@ -20,6 +20,8 @@ import { TransferRequest } from '../../../../shared-types';
 import {
   // authenticateTransferRequest,
   createTransactionRequest,
+  resetState,
+  verifyTransferRequest,
 } from '../../store/slices/transactionSlice';
 import {
   formatNumberWithCommas,
@@ -44,6 +46,9 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
   const { loading, destinationAccount, amount, note } = useSelector(
     (state: RootState) => state.transferUI || {},
   );
+  const { isVerified, error } = useSelector(
+    (state: RootState) => state.transactionUI,
+  );
 
   const { currentAccount } = useSelector((state: RootState) => state.accountUI);
   useEffect(() => {
@@ -57,7 +62,6 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
 
   const dispatch = useDispatch();
 
@@ -73,34 +77,41 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
     }
 
     setPassword('');
-    setError('');
     setModalVisible(true);
   };
 
-  const confirmTransfer = () => {
-    if (!password || password.length < 4) {
-      setError('Vui lòng nhập mật khẩu (ít nhất 4 ký tự)');
-      return;
-    }
-
-    const payload = {
-      auth: { email, password },
-      transfer: {
+  useEffect(() => {
+    if (isVerified) {
+      const transfer = {
         fromAccountId: currentAccount?.id || null,
         toAccountId: destinationAccount?.id || null,
         amount,
         description: note,
-      },
-    };
+      };
+      dispatch(createTransactionRequest(transfer));
+      setModalVisible(false);
+      dispatch(resetState())
+      navigation.navigate('TransactionStatus');
+    }
+  }, [isVerified]);
 
-    dispatch(createTransactionRequest(payload));
-    setModalVisible(false);
-    navigation.navigate('TransactionStatus')
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Xác thực thất bại', error, [{ text: 'OK' }]);
+    }
+  }, [error]);
+
+  const confirmTransfer = () => {
+    if (!password || password.length < 4) {
+      return;
+    }
+
+    dispatch(verifyTransferRequest({ email, password }));
   };
+
   const closeModal = () => {
     setModalVisible(false);
     setPassword('');
-    setError('');
   };
   const styles = StyleSheet.create({
     container: {
@@ -363,7 +374,7 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
                   </TouchableOpacity>
                 </View>
 
-                {error ? <Text style={styles.errorText}>{error}</Text> : null}
+                {error ? <Text style={styles.errorText}>Sai mật khẩu vui lòng nhập lại</Text> : null}
 
                 <View style={styles.modalButtons}>
                   <TouchableOpacity

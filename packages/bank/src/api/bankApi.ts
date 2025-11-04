@@ -67,9 +67,7 @@ export const bankApi = {
 
   // authenticate account
   async authenticateTransfer(data: AuthenticateRequest): Promise<boolean> {
-    const response = await apiClient.post(`auth/login`, data);
-    console.log('[api] res: ', response);
-    
+    const response = await apiClient.post(`auth/verify`, data);
     return response.status === 200;
   }
 };

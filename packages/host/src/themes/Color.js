@@ -5,12 +5,18 @@ const Color = {
   danger: '#F44336',
 
   lightBg: '#9500ffff',
+  opacityBg: '#cc88fd20',
   boldBg: '#7c00d4ff',
-  modalBg: '#ecececff', 
+  btnBg: '#e0e0e0b2',
   primaryText: '#212121',
   whiteText: '#f2f2f2',
   subText: '#666',
   secondBg: '#ff9900ff',
-  highlightText: '#9500ffff'
+  highlightText: '#9500ffff',
+  boldLine: '#777',
+  lightLine: '#d2d2d2ff',
+  modalBg: '#ecececff'
+
 };
+
 export default Color;

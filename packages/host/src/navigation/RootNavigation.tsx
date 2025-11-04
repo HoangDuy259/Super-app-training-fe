@@ -4,10 +4,12 @@ import LoginScreen from '../screens/auth/LoginScreen';
 import SignUpScreen from '../screens/auth/SignUpScreen';
 import MainNavigation from './MainNavigation';
 import { AuthContext } from '../saga/auth/AuthContext';
+import ForgotPasswordScreen from '../screens/auth/ForgotPasswordScreen';
 
 export type RootStackParamsList = {
   Login: undefined;
   SignUp: undefined;
+  ForgotPassword: undefined;
   Main: undefined;
 };
 
@@ -22,6 +24,7 @@ const RootNavigation = () => {
           <>
             <Stack.Screen name="Login" component={LoginScreen} />
             <Stack.Screen name="SignUp" component={SignUpScreen} />
+            <Stack.Screen name="ForgotPassword" component={ForgotPasswordScreen} />
           </>
         ) : (
           <Stack.Screen name="Main" component={MainNavigation} />
