@@ -13,6 +13,7 @@ export interface Transaction {
 }
 
 export interface TransactionState {
+  isVerified: boolean,
   transactions: Transaction[];
   currentTransaction: Transaction | null;
   loading: boolean,
@@ -20,7 +21,7 @@ export interface TransactionState {
 }
 
 export interface TransferState {
-  selectedAccount: BankAccount | null;
+  // selectedAccount: BankAccount | null;
   destinationAccount: BankAccount | null;
   amount: number;
   note: string;
@@ -34,3 +35,13 @@ export interface TransferRequest {
   amount: number;
   description: string;
 }
+
+export interface AuthenticateRequest {
+  email: string | null;
+  password: string | null;
+}
+
+// export interface CreateTransactionPayload {
+//   auth: AuthenticateRequest;
+//   transfer: TransferRequest;
+// }

@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { TransferState, BankAccount } from '../../../../shared-types';
 
 const initialState: TransferState = {
-  selectedAccount: null,
+  // selectedAccount: null,
   destinationAccount: null,
   amount: 0,
   note: '',
@@ -15,12 +15,16 @@ const transferSlice = createSlice({
   initialState,
   reducers: {
     // select account
-    selectAccount(state, action: PayloadAction<BankAccount>) {
-      state.selectedAccount = action.payload;
-    },
+    // selectAccount(state, action: PayloadAction<BankAccount>) {
+    //   state.selectedAccount = action.payload;
+    // },
 
     selectDestinationAccount(state, action: PayloadAction<BankAccount>) {
       state.destinationAccount = action.payload;
+    },
+
+    clearDestinationAccount(state) {
+      state.destinationAccount = null;
     },
 
     // edit note and amount
@@ -50,12 +54,12 @@ const transferSlice = createSlice({
 });
 
 export const {
-  selectAccount,
   selectDestinationAccount,
   changeAmount,
   changeNote,
   findDestinationAccountRequest,
   findDestinationAccountSuccess,
   findDestinationAccountFailure,
+  clearDestinationAccount
 } = transferSlice.actions;
 export default transferSlice.reducer;

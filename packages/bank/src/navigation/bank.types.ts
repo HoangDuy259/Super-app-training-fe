@@ -9,7 +9,6 @@ export type BankStackParamsList = {
 export type TransferStackParamsList = {
   ChooseBank: { fromAccountId: string };
   FindDestinationAccount: { toBankId: string }
-  InputAmount: { toAccountId: string };
   ConfirmCode: undefined;
   TransactionStatus: undefined;
 }

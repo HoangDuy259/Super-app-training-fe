@@ -20,3 +20,9 @@ export interface SignupPayload {
   password: string;
   confirmPassword: string;
 }
+
+export interface ForgotPassword{
+  email: string;
+  newPassword: string;
+  otp: string;
+}

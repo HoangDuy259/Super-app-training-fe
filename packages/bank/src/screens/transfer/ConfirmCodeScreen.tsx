@@ -1,10 +1,12 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Alert,
+  Modal,
   SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
+  TouchableWithoutFeedback,
   useWindowDimensions,
   View,
 } from 'react-native';
@@ -14,13 +16,19 @@ import { StackNavigationProp } from '@react-navigation/stack';
 import { TransferStackParamsList } from '../../navigation/bank.types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../host/src/store/store';
-import { bankApi } from '../../api/bankApi';
 import { TransferRequest } from '../../../../shared-types';
-import { createTransactionRequest } from '../../store/slices/transactionSlice';
+import {
+  // authenticateTransferRequest,
+  createTransactionRequest,
+  resetState,
+  verifyTransferRequest,
+} from '../../store/slices/transactionSlice';
 import {
   formatNumberWithCommas,
   parseNumberFromFormatted,
 } from '../../utils/formatter';
+import { TextInput } from 'react-native-gesture-handler';
+import { remoteStorage } from '../../store/storage/remoteStorage';
 
 type ConfirmCodeScreenNavigationProp = StackNavigationProp<
   TransferStackParamsList,
@@ -32,42 +40,79 @@ interface ConfirmCodeScreenProps {
 }
 
 const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
+  // local state
+  const [email, setEmail] = useState('');
   // redux state
-  const { loading, selectedAccount, destinationAccount, amount, note } =
-    useSelector((state: RootState) => state.transferUI || {});
+  const { loading, destinationAccount, amount, note } = useSelector(
+    (state: RootState) => state.transferUI || {},
+  );
+  const { isVerified, error } = useSelector(
+    (state: RootState) => state.transactionUI,
+  );
+
+  const { currentAccount } = useSelector((state: RootState) => state.accountUI);
+  useEffect(() => {
+    const fetchUser = async () => {
+      const response = await remoteStorage.getUser();
+      setEmail(response?.email!);
+    };
+    fetchUser();
+  }, []);
+
+  const [modalVisible, setModalVisible] = useState(false);
+  const [password, setPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
 
   const dispatch = useDispatch();
 
   // handle confirm
-  const acceptAction = () => {
-    const data: TransferRequest = {
-      fromAccountId: selectedAccount?.id || null,
-      toAccountId: destinationAccount?.id || null,
-      amount: amount,
-      description: note,
-    };
-    dispatch(createTransactionRequest(data));
-    navigation.navigate('TransactionStatus');
-  };
-
   const handleAccept = () => {
-    Alert.alert(
-      'Xác nhận đăng xuất',
-      'Bạn có chắc muốn đăng xuất không?',
-      [
-        { text: 'Hủy', style: 'cancel' },
-        {
-          text: 'Xác nhận',
-          style: 'destructive',
-          onPress: () => {
-            acceptAction;
-          },
-        },
-      ],
-      { cancelable: true },
-    );
+    if (currentAccount?.balance! < amount) {
+      Alert.alert(
+        'Lỗi chuyển khoản',
+        'Số dư tài khoản không đủ để thực hiện giao dịch này.',
+        [{ text: 'OK' }],
+      );
+      return;
+    }
+
+    setPassword('');
+    setModalVisible(true);
   };
 
+  useEffect(() => {
+    if (isVerified) {
+      const transfer = {
+        fromAccountId: currentAccount?.id || null,
+        toAccountId: destinationAccount?.id || null,
+        amount,
+        description: note,
+      };
+      dispatch(createTransactionRequest(transfer));
+      setModalVisible(false);
+      dispatch(resetState())
+      navigation.navigate('TransactionStatus');
+    }
+  }, [isVerified]);
+
+  useEffect(() => {
+    if (error) {
+      Alert.alert('Xác thực thất bại', error, [{ text: 'OK' }]);
+    }
+  }, [error]);
+
+  const confirmTransfer = () => {
+    if (!password || password.length < 4) {
+      return;
+    }
+
+    dispatch(verifyTransferRequest({ email, password }));
+  };
+
+  const closeModal = () => {
+    setModalVisible(false);
+    setPassword('');
+  };
   const styles = StyleSheet.create({
     container: {
       flex: 1,
@@ -119,6 +164,86 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
       flex: 0.3,
       paddingVertical: 10,
       marginRight: 4,
+    },
+    modalOverlay: {
+      flex: 1,
+      backgroundColor: 'rgba(0,0,0,0.5)',
+      justifyContent: 'center',
+      alignItems: 'center',
+    },
+    modalContent: {
+      width: '85%',
+      backgroundColor: '#fff',
+      padding: 24,
+      borderRadius: 16,
+      elevation: 10,
+      shadowColor: '#000',
+      shadowOffset: { width: 0, height: 2 },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+    },
+    modalTitle: {
+      fontSize: 20,
+      fontWeight: 'bold',
+      textAlign: 'center',
+      marginBottom: 8,
+    },
+    modalSubtitle: {
+      fontSize: 14,
+      color: '#666',
+      textAlign: 'center',
+      marginBottom: 20,
+    },
+    passwordBox: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      borderWidth: 1,
+      borderColor: '#ddd',
+      borderRadius: 12,
+      backgroundColor: '#f9f9f9',
+      paddingHorizontal: 12,
+    },
+    passwordInput: {
+      flex: 1,
+      fontSize: 18,
+      paddingVertical: 14,
+      color: '#000',
+    },
+    eyeBtn: { padding: 8 },
+    errorText: {
+      color: 'red',
+      fontSize: 13,
+      marginTop: 8,
+      textAlign: 'center',
+    },
+    modalButtons: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      marginTop: 20,
+    },
+    modalBtnCancel: {
+      flex: 1,
+      padding: 14,
+      backgroundColor: '#eee',
+      borderRadius: 12,
+      marginRight: 8,
+    },
+    modalBtnConfirm: {
+      flex: 1,
+      padding: 14,
+      backgroundColor: Color.primary,
+      borderRadius: 12,
+      marginLeft: 8,
+    },
+    modalBtnTextCancel: {
+      color: '#666',
+      textAlign: 'center',
+      fontWeight: '600',
+    },
+    modalBtnTextConfirm: {
+      color: '#fff',
+      textAlign: 'center',
+      fontWeight: '600',
     },
   });
 
@@ -210,6 +335,66 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
           </TouchableOpacity>
         </View>
       </View>
+      <Modal
+        visible={modalVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={closeModal}
+      >
+        <TouchableWithoutFeedback onPress={closeModal}>
+          <View style={styles.modalOverlay}>
+            <TouchableWithoutFeedback>
+              <View style={styles.modalContent}>
+                <Text style={styles.modalTitle}>Xác thực giao dịch</Text>
+                <Text style={styles.modalSubtitle}>
+                  Nhập mật khẩu để tiếp tục
+                </Text>
+
+                <View style={styles.passwordBox}>
+                  <TextInput
+                    style={styles.passwordInput}
+                    placeholder="Mật khẩu"
+                    placeholderTextColor="#aaa"
+                    secureTextEntry={!showPassword}
+                    value={password}
+                    onChangeText={setPassword}
+                    autoFocus
+                    returnKeyType="done"
+                    onSubmitEditing={confirmTransfer}
+                  />
+                  <TouchableOpacity
+                    onPress={() => setShowPassword(!showPassword)}
+                    style={styles.eyeBtn}
+                  >
+                    <Icon
+                      name={showPassword ? 'eye-slash' : 'eye'}
+                      size={20}
+                      color="#666"
+                    />
+                  </TouchableOpacity>
+                </View>
+
+                {error ? <Text style={styles.errorText}>Sai mật khẩu vui lòng nhập lại</Text> : null}
+
+                <View style={styles.modalButtons}>
+                  <TouchableOpacity
+                    style={styles.modalBtnCancel}
+                    onPress={closeModal}
+                  >
+                    <Text style={styles.modalBtnTextCancel}>Hủy</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.modalBtnConfirm}
+                    onPress={confirmTransfer}
+                  >
+                    <Text style={styles.modalBtnTextConfirm}>Xác nhận</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </TouchableWithoutFeedback>
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
     </SafeAreaView>
   );
 };

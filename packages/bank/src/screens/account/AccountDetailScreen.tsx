@@ -4,15 +4,16 @@ import {
   Text,
   StyleSheet,
   TouchableOpacity,
-  ScrollView,
+  Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../../themes/Color';
 import { formatCurrency, formatDate } from '../../utils/formatter';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BankStackParamsList } from '../../navigation/bank.types';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../host/src/store/store';
+import { handleAccountStatusRequest } from '../../store/slices/accountSlice';
 
 type AccountDetailScreenNavigationProp = StackNavigationProp<
   BankStackParamsList,
@@ -157,13 +158,47 @@ const styles = StyleSheet.create({
 });
 
 const AccountDetail = ({ navigation }: AccountDetailScreenProps) => {
-  const { selectedAccount } = useSelector((state: RootState) => state.transferUI || {});
-  const isActive = selectedAccount?.status === 'ACTIVE';
+  const { currentAccount } = useSelector(
+    (state: RootState) => state.accountUI || {},
+  );
+  const isActive = currentAccount?.status === 'ACTIVE';
   const statusColor = isActive ? Color.success : Color.danger;
   const statusText = isActive ? 'Hoạt động' : 'Bị khóa';
   const buttonText = isActive ? 'Khóa tài khoản' : 'Mở khóa';
   const buttonColor = isActive ? Color.danger : Color.success;
-  
+
+  const dispatch = useDispatch();
+
+  const handleAccountStatus = () => {
+    if (!currentAccount) return;
+
+    const req = {
+      account: currentAccount,
+      status: currentAccount.status,
+    };
+
+    // Nếu tài khoản còn tiền và đang hoạt động
+    if (currentAccount.balance > 0 && currentAccount.status === 'ACTIVE') {
+      Alert.alert(
+        'Cảnh báo',
+        'Số dư trong tài khoản vẫn còn, bạn có chắc muốn khóa thẻ?',
+        [
+          { text: 'Hủy', style: 'cancel' },
+          {
+            text: 'Xác nhận',
+            style: 'destructive',
+            onPress: () => {
+              dispatch(handleAccountStatusRequest(req));
+            },
+          },
+        ],
+        { cancelable: true },
+      );
+    }
+    else {
+      dispatch(handleAccountStatusRequest(req));
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -180,60 +215,67 @@ const AccountDetail = ({ navigation }: AccountDetailScreenProps) => {
       </View>
 
       {/* CONTENT */}
-      <View
-        style={styles.scrollContent}
-      >
+      <View style={styles.scrollContent}>
         <View style={styles.cardList}>
-            <View style={styles.card}>
-      {/* Header card: Số tài khoản */}
-      <View style={styles.cardHeader}>
-        <Text style={styles.accountNumber}>{selectedAccount?.accountNumber}</Text>
-        <View
-          style={[styles.statusBadge, { backgroundColor: statusColor + '20' }]}
-        >
-          <Text style={[styles.statusText, { color: statusColor }]}>
-            {statusText}
-          </Text>
-        </View>
-      </View>
+          <View style={styles.card}>
+            {/* Header card: Số tài khoản */}
+            <View style={styles.cardHeader}>
+              <Text style={styles.accountNumber}>
+                {currentAccount?.accountNumber}
+              </Text>
+              <View
+                style={[
+                  styles.statusBadge,
+                  { backgroundColor: statusColor + '20' },
+                ]}
+              >
+                <Text style={[styles.statusText, { color: statusColor }]}>
+                  {statusText}
+                </Text>
+              </View>
+            </View>
 
-      {/* Số dư */}
-      <View style={styles.balanceRow}>
-        <Text style={styles.balanceLabel}>Số dư</Text>
-        <Text style={styles.balanceAmount}>
-          {formatCurrency(selectedAccount?.balance!)}
-        </Text>
-      </View>
+            {/* Số dư */}
+            <View style={styles.balanceRow}>
+              <Text style={styles.balanceLabel}>Số dư</Text>
+              <Text style={styles.balanceAmount}>
+                {formatCurrency(currentAccount?.balance!)}
+              </Text>
+            </View>
 
-      {/* Thông tin phụ */}
-      <View style={styles.infoRow}>
-        <Text style={styles.infoLabel}>Ngày tạo</Text>
-        <Text style={styles.infoValue}>{formatDate(selectedAccount?.createdDate!)}</Text>
-      </View>
+            {/* Thông tin phụ */}
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>Ngày tạo</Text>
+              <Text style={styles.infoValue}>
+                {formatDate(currentAccount?.createdDate!)}
+              </Text>
+            </View>
 
-      {/* Nút hành động */}
-      <TouchableOpacity
-        style={[
-          styles.actionButton,
-          { backgroundColor: buttonColor + '15', borderColor: buttonColor },
-        ]}
-        activeOpacity={0.7}
-        onPress={() => {
-          // Bạn sẽ xử lý khóa/mở ở đây
-          console.log('Action:', buttonText, selectedAccount?.accountNumber);
-        }}
-      >
-        <Icon
-          name={isActive ? 'lock' : 'lock-open'}
-          size={18}
-          color={buttonColor}
-          style={styles.buttonIcon}
-        />
-        <Text style={[styles.buttonText, { color: buttonColor }]}>
-          {buttonText}
-        </Text>
-      </TouchableOpacity>
-    </View>
+            {/* Nút hành động */}
+            <TouchableOpacity
+              style={[
+                styles.actionButton,
+                {
+                  backgroundColor: buttonColor + '15',
+                  borderColor: buttonColor,
+                },
+              ]}
+              activeOpacity={0.7}
+              onPress={() => {
+                handleAccountStatus();
+              }}
+            >
+              <Icon
+                name={isActive ? 'lock' : 'lock-open'}
+                size={18}
+                color={buttonColor}
+                style={styles.buttonIcon}
+              />
+              <Text style={[styles.buttonText, { color: buttonColor }]}>
+                {buttonText}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     </View>

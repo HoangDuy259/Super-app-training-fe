@@ -2,6 +2,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import type {
   AuthState,
+  ForgotPassword,
   LoginPayload,
   SignupPayload,
 } from '../../../../shared-types';
@@ -38,6 +39,16 @@ const authSlice = createSlice({
       state.loading = false;
     },
 
+    // send otp
+    sendOtpRequest(state, action: PayloadAction<string>) {
+      state.loading = true;
+    },
+
+    // change password
+    changePasswordRequest(state, action: PayloadAction<ForgotPassword>) {
+      state.loading = true;
+    },
+
     // LOGOUT
     logoutRequest: state => {
       state.isAuthenticated = false;
@@ -54,6 +65,8 @@ export const {
   signupSuccess,
   signupFailure,
   logoutRequest,
+  sendOtpRequest,
+  changePasswordRequest
 } = authSlice.actions;
 
 export default authSlice.reducer;

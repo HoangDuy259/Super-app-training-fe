@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  Alert,
   Modal,
   SafeAreaView,
   StyleSheet,
@@ -21,7 +22,10 @@ import {
   findDestinationAccountRequest,
 } from '../../store/slices/transferSlice';
 import { remoteStorage } from '../../store/storage/remoteStorage';
-import {formatNumberWithCommas, parseNumberFromFormatted} from '../../utils/formatter'
+import {
+  formatNumberWithCommas,
+  parseNumberFromFormatted,
+} from '../../utils/formatter';
 
 // MODAL OF CHOOSING ACCOUNT
 interface ChooseAccountModalProps {
@@ -124,13 +128,13 @@ const FindDestinationAccountScreen = ({
   const { height } = useWindowDimensions();
   const heightInfoAccountList = height * 0.15;
   const [focused, setFocused] = useState<boolean>(false);
-  const [foundAccount, setFoundAccount] = useState<boolean>(false);
   const [showModal, setShowModal] = useState(false);
 
   // redux state
-  const { selectedAccount, destinationAccount, loading } = useSelector(
+  const { destinationAccount, loading } = useSelector(
     (state: RootState) => state.transferUI || {},
   );
+  const { currentAccount } = useSelector((state: RootState) => state.accountUI);
 
   // hooks
   const dispatch = useDispatch();
@@ -148,13 +152,26 @@ const FindDestinationAccountScreen = ({
 
   // handle find destination account
   const handleFindDestinationAccount = (accNum: string) => {
-    setFoundAccount(true);
     dispatch(findDestinationAccountRequest(accNum));
   };
 
   // handle next step (confirm transfer information)
   const handleConfirmTransferInfo = (note: string) => {
     const amount = parseNumberFromFormatted(inputAmount);
+    if (!amount || amount < 1000) {
+      Alert.alert(
+        'Thiếu thông tin',
+        'Vui lòng nhập số tiền, tối thiểu 1000 vnđ',
+        [{ text: 'OK' }],
+      );
+      return;
+    }
+    if (!destinationAccount) {
+      Alert.alert('Thiếu thông tin', 'Vui lòng chọn tài khoản thụ hưởng', [
+        { text: 'OK' },
+      ]);
+      return;
+    }
     dispatch(changeNote(note));
     dispatch(changeAmount(amount));
     navigation.navigate('ConfirmCode');
@@ -203,7 +220,9 @@ const FindDestinationAccountScreen = ({
     },
 
     infoDetail: {
-      marginLeft: 12,
+      marginLeft: 20,
+      flex: 1,
+      alignItems: 'flex-start',
     },
 
     searchContainer: {
@@ -241,7 +260,16 @@ const FindDestinationAccountScreen = ({
       flexDirection: 'column',
     },
 
-    note: {},
+    inputInfo: {
+      color: Color.primaryText,
+      fontSize: 24,
+      textAlign: 'center',
+      borderColor: Color.boldLine,
+      borderWidth: 1,
+      borderRadius: 8,
+      marginVertical: 12,
+      paddingHorizontal: 12
+    },
 
     btnNext: {
       marginLeft: 8,
@@ -287,26 +315,36 @@ const FindDestinationAccountScreen = ({
           >
             <Icon name="building-columns" size={32} />
             <View style={styles.infoDetail}>
-              <Text>Nguồn tiền: {selectedAccount?.accountNumber}</Text>
-              <Text>Số dư: {selectedAccount?.balance}</Text>
+              <Text>Nguồn tiền: {currentAccount?.accountNumber}</Text>
+              <Text>
+                Số dư: {formatNumberWithCommas(currentAccount?.balance)}
+              </Text>
             </View>
             <Icon name="angle-right" size={24} />
           </TouchableOpacity>
           <View style={{ borderWidth: 0.5 }}></View>
           <TouchableOpacity style={styles.infoAccountItem}>
             <Icon name="building-columns" size={32} />
-            {!foundAccount && (
+            {!destinationAccount && (
               <View style={styles.infoDetail}>
-                <Text>Tên ngân hàng nhận</Text>
+                <Text>Chưa có tài khoản thụ hưởng</Text>
               </View>
             )}
-            {foundAccount && (
+            {destinationAccount && destinationAccount?.status === 'ACTIVE' && (
               <View style={styles.infoDetail}>
                 <Text>Tài khoản nhận: {destinationAccount?.accountNumber}</Text>
                 <Text>Tên ngân hàng nhận</Text>
                 <Text>
                   {destinationAccount?.user.firstName}{' '}
                   {destinationAccount?.user.lastName}
+                </Text>
+              </View>
+            )}
+            {destinationAccount && destinationAccount?.status !== 'ACTIVE' && (
+              <View style={styles.infoDetail}>
+                <Text>Tài khoản nhận: {destinationAccount?.accountNumber}</Text>
+                <Text style={{ color: Color.danger }}>
+                  Tài khoản đang bị khóa
                 </Text>
               </View>
             )}
@@ -344,19 +382,20 @@ const FindDestinationAccountScreen = ({
         </View>
         {/* input amount */}
         <View style={styles.inputContainer}>
+          <Text style={{ color: Color.subText, marginTop: 20 }}>Số tiền: </Text>
+
           <TextInput
             placeholder="0 VND"
             value={inputAmount}
-            onChangeText={(text:string) => setInputAmount(formatNumberWithCommas(text))}
+            onChangeText={(text: string) =>
+              setInputAmount(formatNumberWithCommas(text))
+            }
             keyboardType="numeric"
             autoFocus
-            style={{
-              color: Color.primaryText,
-              fontSize: 24,
-              textAlign: 'center',
-            }}
+            style={styles.inputInfo}
           />
-          <View style={styles.note}>
+          <Text style={{ color: Color.subText }}>Nội dung: </Text>
+          <View style={styles.inputInfo}>
             <TextInput
               placeholder={note}
               value={note}
@@ -400,6 +439,7 @@ const FindDestinationAccountScreen = ({
           {/* button next */}
           <TouchableOpacity
             activeOpacity={0.7}
+            disabled={destinationAccount?.status === 'INACTIVE'}
             onPress={() => {
               handleConfirmTransferInfo(note);
             }}

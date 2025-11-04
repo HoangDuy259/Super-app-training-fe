@@ -1,7 +1,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { TransactionState, Transaction, TransferRequest } from '../../../../shared-types';
+import {
+  TransactionState,
+  Transaction,
+  TransferRequest,
+  // AuthenticateRequest,
+  // CreateTransactionPayload,
+  LoginPayload,
+} from '../../../../shared-types';
 
 const initialState: TransactionState = {
+  isVerified: false,
   loading: false,
   error: null,
   transactions: [],
@@ -39,6 +47,24 @@ const transactionSlice = createSlice({
       state.loading = false;
       state.error = action.payload;
     },
+
+    verifyTransferRequest(state, action: PayloadAction<LoginPayload>) {
+      state.loading = true;
+    },
+    verifyTransferSuccess(state, action: PayloadAction<boolean>) {
+      state.loading = false;
+      state.isVerified = action.payload;
+    },
+    verifyTransferFailure(state, action: PayloadAction<string>) {
+      state.loading = false;
+      state.error = action.payload;
+    },
+    resetState(state) {
+      state.currentTransaction = null;
+      state.error = null;
+      state.isVerified = false;
+      state.loading = false;
+    },
   },
 });
 
@@ -49,5 +75,9 @@ export const {
   fetchTransactionsRequest,
   fetchTransactionsSuccess,
   fetchTransactionsFailure,
+  verifyTransferRequest,
+  verifyTransferSuccess,
+  verifyTransferFailure,
+  resetState,
 } = transactionSlice.actions;
 export default transactionSlice.reducer;

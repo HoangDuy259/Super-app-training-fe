@@ -24,10 +24,20 @@ interface TransactionHistoryScreenProps {
   navigation: TransactionHistoryScreenNavigationProp;
 }
 
-const TransactionItem = ({ item, currentAccountNumber }: { item: any; currentAccountNumber: string | undefined }) => {
+const TransactionItem = ({
+  item,
+  currentAccountNumber,
+}: {
+  item: any;
+  currentAccountNumber: string | undefined;
+}) => {
   const isIn = item.destinationAccountNumber === currentAccountNumber;
-  const amountText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(item.amount);
-  const title = item.description || (isIn ? 'Nhận tiền chuyển khoản' : 'Chuyển tiền');
+  const amountText = new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(item.amount);
+  const title =
+    item.description || (isIn ? 'Nhận tiền chuyển khoản' : 'Chuyển tiền');
 
   return (
     <View style={styles.transactionItem}>
@@ -85,17 +95,17 @@ const TransactionHistoryScreen = ({
   const { transactions, loading } = useSelector(
     (state: RootState) => state.transactionUI || {},
   );
-  const {selectedAccount} = useSelector((state: RootState) => state.transferUI || {})
+
+  const { currentAccount } = useSelector((state: RootState) => state.accountUI);
+
   const dispatch = useDispatch();
 
-  console.log('[history]: selected acc: ', selectedAccount);
+  console.log('[history]: selected acc: ', currentAccount);
   console.log('[history]: transaction: ', transactions);
 
   useEffect(() => {
-    
-    dispatch(fetchTransactionsRequest(selectedAccount?.id!))
-  }, [selectedAccount])
-  
+    dispatch(fetchTransactionsRequest(currentAccount?.id!));
+  }, [currentAccount]);
 
   const grouped = groupTransactions(transactions);
   if (loading) return <Text>Đang loading ...</Text>;
@@ -131,7 +141,11 @@ const TransactionHistoryScreen = ({
           <View key={idx} style={styles.dateGroup}>
             <Text style={styles.dateLabel}>{group.date}</Text>
             {group.items.map((item: any) => (
-              <TransactionItem key={item.id} item={item} currentAccountNumber={selectedAccount?.accountNumber} />
+              <TransactionItem
+                key={item.id}
+                item={item}
+                currentAccountNumber={currentAccount?.accountNumber}
+              />
             ))}
           </View>
         ))}

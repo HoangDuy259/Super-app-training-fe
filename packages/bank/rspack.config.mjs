@@ -76,8 +76,6 @@ export default env => {
                 './src/screens/transfer/ChooseBankScreen',
               './screens/FindDestinationAccountScreen':
                 './src/screens/transfer/FindDestinationAccountScreen',
-              './screens/InputAmountScreen':
-                './src/screens/transfer/InputAmountScreen',
               './screens/ConfirmCodeScreen':
                 './src/screens/transfer/ConfirmCodeScreen',
               './screens/TransactionStatusScreen':
