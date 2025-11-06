@@ -66,11 +66,13 @@ export default env => {
               // định nghĩa các màn hình remote ở đây
               // remote navigation
               './navigation/BankNavigation': './src/navigation/BankNavigation',
+              './navigation/AccountNavigation': './src/navigation/AccountNavigation',
               // home
               './screens/BankScreen': './src/screens/BankScreen',
               // account
               './screens/AccountScreen': './src/screens/account/AccountScreen',
               './screens/AccountDetailScreen': './src/screens/account/AccountDetailScreen',
+              './screens/LockedAccountsScreen': './src/screens/account/LockedAccountsScreen',
               // transfer
               './screens/ChooseBankScreen':
                 './src/screens/transfer/ChooseBankScreen',

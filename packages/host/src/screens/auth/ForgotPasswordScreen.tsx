@@ -105,7 +105,7 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
               <Text style={styles.label}>Email của bạn</Text>
               <TextInput
                 style={styles.input}
-                placeholder="nhập email..."
+                placeholder="Nhập email..."
                 placeholderTextColor={Color.subText}
                 value={email}
                 onChangeText={setEmail}
@@ -137,7 +137,7 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
               <Text style={styles.label}>Mật khẩu mới</Text>
               <TextInput
                 style={styles.input}
-                placeholder="ít nhất 6 ký tự"
+                placeholder="Ít nhất 6 ký tự"
                 placeholderTextColor={Color.subText}
                 value={newPassword}
                 onChangeText={setNewPassword}
@@ -147,7 +147,7 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
               <Text style={styles.label}>Nhập lại mật khẩu</Text>
               <TextInput
                 style={styles.input}
-                placeholder="xác nhận mật khẩu"
+                placeholder="Xác nhận mật khẩu"
                 placeholderTextColor={Color.subText}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
@@ -221,12 +221,12 @@ const styles = StyleSheet.create({
     color: Color.primaryText,
   },
   primaryButton: {
-    backgroundColor: Color.primary,
+    backgroundColor: Color.boldBg,
     height: 52,
     borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 16,
+    paddingHorizontal: 8
   },
   primaryButtonText: {
     color: '#fff',
@@ -238,6 +238,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 16,
     gap: 12,
+    alignItems: 'center'
   },
   cancelButton: {
     flex: 1,

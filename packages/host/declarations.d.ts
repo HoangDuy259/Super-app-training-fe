@@ -2,6 +2,7 @@
 
 // bank module navigation
 declare module 'bank/navigation/BankNavigation'
+declare module 'bank/navigation/AccountNavigation'
 // screen/bank/transfer
 declare module 'bank/screens/BankScreen';
 declare module 'bank/screens/transfer/TransactionStatusScreen';
@@ -10,6 +11,8 @@ declare module 'bank/screens/transfer/ChooseBankScreen';
 declare module 'bank/screens/transfer/ConfirmCodeScreen';
 // screen/bank/account
 declare module 'bank/screens/account/AccountScreen';
+declare module 'bank/screens/LockedAccountsScreen';
+
 // slices:
 declare module 'bank/store/transferSlice'
 declare module 'bank/store/accountSlice'

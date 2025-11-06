@@ -10,19 +10,20 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { BankStackParamsList } from '../navigation/bank.types';
 import { moreServiceTab, staticTab } from '../constant/bankScreen';
 import { remoteStorage } from '../store/storage/remoteStorage';
-import { UserInfo } from '../../../shared-types';
+import { LoginResponse, UserInfo } from '../../../shared-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../host/src/store/store';
 import { getAccountRequest } from '../store/slices/accountSlice';
 import { selectAccount } from '../store/slices/accountSlice';
 import { clearDestinationAccount } from '../store/slices/transferSlice';
+import { eventBus } from '../../../shared-types/utils/eventBus';
 
 type BankScreenNavigationProp = StackNavigationProp<
   BankStackParamsList,
@@ -37,13 +38,20 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   const { width } = useWindowDimensions();
   const itemWidth = (width - 70) / 4;
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [token, setToken] = useState<LoginResponse | null>(null);
 
   const dispatch = useDispatch();
   const { accounts, loading } = useSelector(
     (state: RootState) => state.accountUI || {},
   );
   const { currentAccount } = useSelector((state: RootState) => state.accountUI);
-  const { currentTransaction } = useSelector((state: RootState) => state.transactionUI);
+  const { currentTransaction } = useSelector(
+    (state: RootState) => state.transactionUI,
+  );
+
+  const activeAccounts = useMemo(() => {
+    return accounts.filter(acc => acc.status === 'ACTIVE');
+  }, [accounts]);
 
   console.log('[REMOTE] BankScreen RENDERED!');
 
@@ -51,11 +59,11 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
     const initBankData = async () => {
       try {
         const tokens = await remoteStorage.getTokens();
-        const userInfo = await remoteStorage.getUser();
-        setUser(userInfo);
+        console.log('[remote] tokens from storage: ', tokens);
 
-        // console.log('TOKEN:', tokens?.accessToken);
-        // console.log('USER ID:', userInfo?.id);
+        const userInfo = await remoteStorage.getUser();
+        console.log('[remote] user from storage: ', userInfo);
+        setUser(userInfo);
 
         if (!tokens?.accessToken || !userInfo?.id) {
           console.log('[REMOTE] Missing token or user!');
@@ -63,7 +71,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
         }
 
         dispatch(getAccountRequest(userInfo.id));
-        dispatch(selectAccount(accounts[0]));
+        // dispatch(selectAccount(activeAccounts[0]));
       } catch (error) {
         console.error('[REMOTE] Init error:', error);
       }
@@ -77,44 +85,33 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   }, []);
 
   useEffect(() => {
-    if (accounts && accounts.length > 0) {
-      dispatch(selectAccount(accounts[0]));
+    if (activeAccounts && activeAccounts.length > 0) {
+      dispatch(selectAccount(activeAccounts[0]));
     }
-  }, [accounts]);
+  }, [activeAccounts]);
 
   // handle expiration of access token
-  // useEffect(() => {
+  useEffect(() => {
+    const unsubscribe = eventBus.on(
+      'TOKEN_UPDATED',
+      (newToken: LoginResponse) => {
+        console.log('[TokenTestScreen] Token updated:', newToken);
+        setToken(newToken);
+      },
+    );
 
-  //   let unsubscribe: (() => void) | undefined;
-  //   if ((global as any).eventBus?.on) {
-  //     unsubscribe = (global as any).eventBus.on(
-  //       'TOKEN_UPDATED',
-  //       (newToken: any) => {
-  //         console.log('[TokenTestScreen] Token updated event:', newToken);
-  //         setToken(newToken);
-  //       },
-  //     );
-  //   }
-  // Thử listen event realtime (nếu bạn đang dùng eventBus)
-  // const unsubscribe = (global as any).eventBus?.on?.('TOKEN_UPDATED', (newToken: any) => {
-  //   console.log('[TokenTestScreen] Token updated event:', newToken);
-  //   setToken(newToken);
-  // });
-
-  //   return () => {
-  //     unsubscribe?.();
-  //   };
-  // }, []);
+    return () => unsubscribe?.();
+  }, [setToken]);
 
   // handle scroll end action
-  const [currentIndex, setCurrentIndex] = useState(0);
+  // const [currentIndex, setCurrentIndex] = useState(0);
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = e.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / width);
-    setCurrentIndex(index);
-    console.log('index: ', index);
+    // setCurrentIndex(index);
+    // console.log('index: ', index);
 
-    dispatch(selectAccount(accounts[index]));
+    dispatch(selectAccount(activeAccounts[index]));
   };
 
   useEffect(() => {
@@ -302,7 +299,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
               showsHorizontalScrollIndicator={false}
               onMomentumScrollEnd={handleScrollEnd}
             >
-              {accounts.map(acc => (
+              {activeAccounts.map(acc => (
                 <View key={acc.id} style={[styles.bankAccountItem, { width }]}>
                   <Text style={{ color: Color.whiteText, fontWeight: 700 }}>
                     {acc.accountNumber}
@@ -322,7 +319,7 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
                 <View style={styles.buttonControllerIcon}>
                   <Icon name="right-left" size={32} color={Color.whiteText} />
                 </View>
-                <Text style={styles.textController}>Chuyển tiền</Text>
+                <Text style={styles.textController}>Chuyển tiền nội bộ</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 style={styles.buttonController}

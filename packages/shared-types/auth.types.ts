@@ -1,6 +1,7 @@
 export interface AuthState {
   isAuthenticated: boolean;
   loading: boolean;
+  error: string | null;
 }
 
 export interface LoginPayload {
@@ -18,7 +19,9 @@ export interface LoginResponse {
 export interface SignupPayload {
   email: string;
   password: string;
-  confirmPassword: string;
+  firstName: string;
+  lastName: string;
+  username: string;
 }
 
 export interface ForgotPassword{

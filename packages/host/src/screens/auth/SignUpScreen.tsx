@@ -6,14 +6,15 @@ import {
   TouchableOpacity,
   Alert,
 } from 'react-native';
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { RootStackParamsList } from '../../navigation/RootNavigation';
 import { AuthContext } from '../../saga/auth/AuthContext';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { SignupPayload } from '../../saga/auth/types';
-import { useSelector } from 'react-redux';
-import { RootState } from '../../store/store';
+import { AuthState, SignupPayload } from '../../../../shared-types/auth.types';
+import { useDispatch, useSelector } from 'react-redux';
 import Color from '../../themes/Color';
+import { clearState, signupRequest } from '../../saga/auth/authSlice';
+import { RootState } from '../../store/store';
 
 type SignUpScreenNavigationProp = StackNavigationProp<
   RootStackParamsList,
@@ -27,12 +28,14 @@ interface SignUpScreenProps {
 const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName] = useState('');
   const [password, setPassword] = useState('');
-  const { signUp } = useContext(AuthContext);
-    const [focusedInput, setFocusedInput] = useState<string | null>(null);
-
+  const { error, loading } = useSelector(
+    (state: RootState) => state.auth || {},
+  );
+  const [focusedInput, setFocusedInput] = useState<string | null>(null);
+  const dispatch = useDispatch();
 
   const handleSignUp = async () => {
     if (!email || !username || !password) {
@@ -41,15 +44,15 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
     }
 
     const payload: SignupPayload = {
-      email: email,
-      userName: username,
-      password: password,
+      email,
+      username,
+      password,
+      lastName,
+      firstName,
     };
 
     try {
-      await signUp(payload);
-      Alert.alert('Đăng ký thành công');
-      navigation.navigate('Login');
+      dispatch(signupRequest(payload));
     } catch (error: any) {
       Alert.alert('Đăng ký thất bại', error.message || 'Có lỗi xảy ra');
     }
@@ -61,7 +64,10 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
         placeholder="Tên đăng nhập"
         keyboardType="default"
         autoCapitalize="none"
-        style={[styles.input, focusedInput === 'username' && styles.focusedInput]}
+        style={[
+          styles.input,
+          focusedInput === 'username' && styles.focusedInput,
+        ]}
         value={username}
         onChangeText={setUsername}
         onFocus={() => setFocusedInput('username')}
@@ -81,7 +87,10 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
         placeholder="Họ"
         keyboardType="default"
         autoCapitalize="none"
-        style={[styles.input, focusedInput === 'lastname' && styles.focusedInput]}
+        style={[
+          styles.input,
+          focusedInput === 'lastname' && styles.focusedInput,
+        ]}
         value={lastName}
         onChangeText={setLastName}
         onFocus={() => setFocusedInput('lastname')}
@@ -91,7 +100,10 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
         placeholder="Tên"
         keyboardType="default"
         autoCapitalize="none"
-        style={[styles.input, focusedInput === 'firstname' && styles.focusedInput]}
+        style={[
+          styles.input,
+          focusedInput === 'firstname' && styles.focusedInput,
+        ]}
         value={firstName}
         onChangeText={setFirstName}
         onFocus={() => setFocusedInput('firstname')}
@@ -100,7 +112,10 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
       <TextInput
         value={password}
         onChangeText={setPassword}
-        style={[styles.input, focusedInput === 'password' && styles.focusedInput]}
+        style={[
+          styles.input,
+          focusedInput === 'password' && styles.focusedInput,
+        ]}
         placeholder="Mật khẩu"
         secureTextEntry
         onFocus={() => setFocusedInput('password')}
@@ -110,7 +125,9 @@ const SignUpScreen = ({ navigation }: SignUpScreenProps) => {
         <Text style={styles.buttonText}>Đăng ký</Text>
       </TouchableOpacity>
       <TouchableOpacity onPress={() => navigation.navigate('Login')}>
-        <Text style={styles.linkText}>Bạn đã có tài khoản chưa? Đăng nhập. </Text>
+        <Text style={styles.linkText}>
+          Bạn đã có tài khoản chưa? Đăng nhập.{' '}
+        </Text>
       </TouchableOpacity>
     </View>
   );
@@ -127,7 +144,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 20,
-    color: Color.highlightText
+    color: Color.highlightText,
   },
   input: {
     width: '100%',

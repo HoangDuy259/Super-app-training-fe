@@ -10,6 +10,8 @@ import {
 export const API_URL = 'http://10.0.2.2:8080/superApp';
 
 export const login = async (data: LoginPayload): Promise<LoginResponse> => {
+  console.log('[api]', data);
+  
   const response = await axios.post(`${API_URL}/auth/login`, data);
   const result = response.data.result;
 
@@ -25,11 +27,43 @@ export const login = async (data: LoginPayload): Promise<LoginResponse> => {
 };
 
 export const signup = async (data: SignupPayload) => {
-  const response = await axios.post(`${API_URL}/auth/users/register`, data);
-  if (!response.data) {
-    throw new Error('Sigup Failed');
+  console.log('api, data: ', data);
+  
+  const response = await axios.post<{messsage: string, result: SignupPayload}>(`${API_URL}/auth/register`, data);
+  if (!response.data.result) {
+    console.log('api error', response.data.messsage);
+    throw new Error(response.data.messsage);
   }
-  return response.data;
+  return response.data.result;
+};
+
+
+export const logout = async (refreshToken: string) => {
+  console.log('[api] recieved refresh token ', refreshToken);
+  
+  const response = await axios.post(`${API_URL}/auth/logout?refreshToken=${refreshToken}`);
+  console.log(response.status);
+  
+  if (response.status !== 200) {
+    throw new Error('Đăng xuất không được');
+  }
+  return response.status === 200;
+};
+
+export const getUserInfo = async (accessToken: string): Promise<UserInfo> => {
+  const res = await axios.get(`${API_URL}/user/get-user`, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+  const rs = res.data.result;
+  return {
+    id: rs.id,
+    firstName: rs.firstName,
+    lastName: rs.lastName,
+    email: rs.email,
+    username: rs.username,
+  };
 };
 
 export const refreshAccessToken = async (
@@ -53,22 +87,6 @@ export const refreshAccessToken = async (
     refreshToken: res.data.refresh_token,
     expiresIn: Date.now() + res.data.expires_in * 1000,
     refreshTokenExpiresIn: Date.now() + res.data.refresh_expires_in * 1000,
-  };
-};
-
-export const getUserInfo = async (accessToken: string): Promise<UserInfo> => {
-  const res = await axios.get(`${API_URL}/user/get-user`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  const rs = res.data.result;
-  return {
-    id: rs.id,
-    firstName: rs.firstName,
-    lastName: rs.lastName,
-    email: rs.email,
-    username: rs.username,
   };
 };
 
