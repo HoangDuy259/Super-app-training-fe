@@ -10,14 +10,15 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { BankStackParamsList } from '../../navigation/bank.types';
+import { AccountStackParamsList, BankStackParamsList } from '../../navigation/bank.types';
 import { remoteStorage } from '../../store/storage/remoteStorage';
-import { UserInfo } from '../../../../shared-types';
+import { LoginResponse, UserInfo } from '../../../../shared-types';
 import { useDispatch } from 'react-redux';
 import { logoutRequest } from '../../../../host/src/saga/auth/authSlice';
+import { hostSession } from '../../../../host/src/utils/hostStorage';
 
 type AccountScreenNavigationProp = StackNavigationProp<
-  BankStackParamsList,
+  AccountStackParamsList,
   'Account'
 >;
 
@@ -134,12 +135,15 @@ const styles = StyleSheet.create({
 
 const AccountScreen = ({ navigation }: AccountScreenProps) => {
   const [user, setUser] = useState<UserInfo | null>(null);
+  const [tokens, setTokens] = useState<LoginResponse | null>(null);
   const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchUserInfo = async () => {
       const userInfo = await remoteStorage.getUser();
+      const authInfo = await remoteStorage.getTokens();
       setUser(userInfo);
+      setTokens(authInfo);
     };
     fetchUserInfo();
   }, []);
@@ -155,7 +159,9 @@ const AccountScreen = ({ navigation }: AccountScreenProps) => {
           text: 'Đăng xuất',
           style: 'destructive',
           onPress: () => {
-            dispatch(logoutRequest());
+            dispatch(logoutRequest(tokens?.refreshToken!));
+            hostSession.clearUser();
+            hostSession.clearTokens();
           },
         },
       ],
@@ -209,6 +215,16 @@ const AccountScreen = ({ navigation }: AccountScreenProps) => {
           <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
             <Icon name="key" size={18} color={Color.primary} />
             <Text style={styles.actionText}>Đổi mật khẩu</Text>
+            <Icon name="chevron-right" size={16} color={Color.subText} />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.actionButton}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('LockedAccounts')}
+          >
+            <Icon name="lock" size={18} color={Color.primary} />
+            <Text style={styles.actionText}>Tài khoản đã khóa</Text>
             <Icon name="chevron-right" size={16} color={Color.subText} />
           </TouchableOpacity>
 

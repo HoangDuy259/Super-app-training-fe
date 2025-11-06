@@ -14,17 +14,33 @@ export const hostSession = {
   },
 
   async clearTokens() {
-    await EncryptedStorage.removeItem('auth_tokens');
-    eventBus.emit('TOKEN_CLEARED');
+    try {
+      console.log('[hostSession] START clearTokens');
+      await EncryptedStorage.removeItem('auth_tokens');
+      console.log('[hostSession] SUCCESS clearTokens');
+      eventBus.emit('TOKEN_CLEARED');
+    } catch (error) {
+      console.error('[hostSession] ERROR clearTokens:', error);
+    }
   },
 
   async setUser(user: UserInfo) {
     await EncryptedStorage.setItem('user_info', JSON.stringify(user));
     eventBus.emit('USER_UPDATED', user);
   },
+  async getUser() {
+    const raw = await EncryptedStorage.getItem('user_info');
+    return raw ? JSON.parse(raw) : null;
+  },
 
   async clearUser() {
-    await EncryptedStorage.removeItem('user_info');
-    eventBus.emit('USER_CLEARED');
+    try {
+      console.log('[hostSession] START clearUser');
+      await EncryptedStorage.removeItem('user_info');
+      console.log('[hostSession] SUCCESS clearUser');
+      eventBus.emit('USER_CLEARED');
+    } catch (error) {
+      console.error('[hostSession] ERROR clearUser:', error);
+    }
   },
 };

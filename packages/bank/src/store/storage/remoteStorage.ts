@@ -10,6 +10,17 @@ eventBus.on('TOKEN_UPDATED', (tokens: LoginResponse) => {
   console.log('[remoteSession] Token updated via eventBus');
 });
 
+eventBus.on('USER_CLEARED', () => {
+  currentUser = null;
+  console.log('[remoteSession] User cleared via eventBus');
+});
+
+// reset khi token thay đổi
+eventBus.on('TOKEN_UPDATED', (tokens: LoginResponse) => {
+  currentToken = tokens;
+  console.log('[remoteSession] Token updated via eventBus');
+});
+
 eventBus.on('TOKEN_CLEARED', () => {
   currentToken = null;
   console.log('[remoteSession] Token cleared via eventBus');
@@ -43,7 +54,7 @@ export const remoteStorage = {
     let res = await fetch(url, { ...options, headers });
     if (res.status === 401) {
       console.log('[remoteSession] 401 detected, waiting for refresh...');
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise(r => setTimeout(r, 500));
       const newTokens = await this.getTokens();
       const newAccessToken = newTokens?.accessToken;
       if (newAccessToken && newAccessToken !== accessToken) {

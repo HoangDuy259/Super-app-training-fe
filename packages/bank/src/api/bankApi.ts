@@ -3,6 +3,7 @@ import {
   BankAccount,
   Transaction,
   TransferRequest,
+  UserInfo,
 } from '../../../shared-types';
 import apiClient from './apiClient';
 
@@ -69,5 +70,5 @@ export const bankApi = {
   async authenticateTransfer(data: AuthenticateRequest): Promise<boolean> {
     const response = await apiClient.post(`auth/verify`, data);
     return response.status === 200;
-  }
+  },
 };

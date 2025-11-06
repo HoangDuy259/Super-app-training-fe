@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -26,17 +26,28 @@ import {
   formatNumberWithCommas,
   parseNumberFromFormatted,
 } from '../../utils/formatter';
+import { BankAccount } from '../../../../shared-types';
+import { selectAccount } from '../../store/slices/accountSlice';
 
 // MODAL OF CHOOSING ACCOUNT
 interface ChooseAccountModalProps {
   visible: boolean;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
+  onSelect: (account: BankAccount) => void;
 }
 const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
   visible,
   setVisible,
+  onSelect,
 }) => {
-  const { accounts } = useSelector((state: RootState) => state.accountUI || {});
+  const { accounts, currentAccount } = useSelector(
+    (state: RootState) => state.accountUI || {},
+  );
+
+  const activeAccounts = useMemo(() => {
+  return accounts.filter((acc) => acc.status === 'ACTIVE');
+}, [accounts]);
+
   const styles = StyleSheet.create({
     overlay: {
       flex: 1,
@@ -49,6 +60,7 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
       paddingVertical: 10,
       flexDirection: 'row',
       justifyContent: 'space-between',
+      alignItems: 'center',
       borderBottomWidth: 0.5,
       borderColor: Color.lightLine,
     },
@@ -81,12 +93,12 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
             </TouchableOpacity>
           </View>
           <View style={{ padding: 20 }}>
-            {accounts.map(acc => (
+            {activeAccounts.map(acc => (
               <TouchableOpacity
                 key={acc.id}
                 style={styles.accountItem}
                 onPress={() => {
-                  console.log('Chọn tài khoản 191289341');
+                  onSelect(acc);
                   setVisible(false);
                 }}
               >
@@ -98,7 +110,9 @@ const ChooseAccountModal: React.FC<ChooseAccountModalProps> = ({
                     {acc.balance}
                   </Text>
                 </View>
-                <Icon name="check" color={Color.secondBg} size={16} />
+                {currentAccount?.id === acc.id && (
+                  <Icon name="check" color={Color.secondBg} size={16} />
+                )}
               </TouchableOpacity>
             ))}
           </View>
@@ -153,6 +167,11 @@ const FindDestinationAccountScreen = ({
   // handle find destination account
   const handleFindDestinationAccount = (accNum: string) => {
     dispatch(findDestinationAccountRequest(accNum));
+  };
+
+  // chọn tài khoản
+  const handleSelectAccount = (account: BankAccount) => {
+    dispatch(selectAccount(account)); // Dispatch action từ slice
   };
 
   // handle next step (confirm transfer information)
@@ -268,7 +287,7 @@ const FindDestinationAccountScreen = ({
       borderWidth: 1,
       borderRadius: 8,
       marginVertical: 12,
-      paddingHorizontal: 12
+      paddingHorizontal: 12,
     },
 
     btnNext: {
@@ -333,7 +352,7 @@ const FindDestinationAccountScreen = ({
             {destinationAccount && destinationAccount?.status === 'ACTIVE' && (
               <View style={styles.infoDetail}>
                 <Text>Tài khoản nhận: {destinationAccount?.accountNumber}</Text>
-                <Text>Tên ngân hàng nhận</Text>
+                {/* <Text>Tên ngân hàng nhận</Text> */}
                 <Text>
                   {destinationAccount?.user.firstName}{' '}
                   {destinationAccount?.user.lastName}
@@ -453,7 +472,11 @@ const FindDestinationAccountScreen = ({
           </TouchableOpacity>
         </View>
       </View>
-      <ChooseAccountModal visible={showModal} setVisible={setShowModal} />
+      <ChooseAccountModal
+        visible={showModal}
+        setVisible={setShowModal}
+        onSelect={handleSelectAccount}
+      />
     </SafeAreaView>
   );
 };

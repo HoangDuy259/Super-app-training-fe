@@ -10,6 +10,7 @@ import type {
 const initialState: AuthState = {
   isAuthenticated: false,
   loading: false,
+  error: null
 };
 
 const authSlice = createSlice({
@@ -32,11 +33,12 @@ const authSlice = createSlice({
     signupRequest: (state, action: PayloadAction<SignupPayload>) => {
       state.loading = true;
     },
-    signupSuccess: state => {
+    signupSuccess: (state) => {
       state.loading = false;
     },
-    signupFailure: state => {
+    signupFailure: (state, action: PayloadAction<string>) => {
       state.loading = false;
+      state.error = action.payload
     },
 
     // send otp
@@ -49,11 +51,24 @@ const authSlice = createSlice({
       state.loading = true;
     },
 
-    // LOGOUT
-    logoutRequest: state => {
-      state.isAuthenticated = false;
+    clearState(state){
+      state.error = null;
       state.loading = false;
     },
+
+    // LOGOUT
+    logoutRequest: (state, action: PayloadAction<string>) => {
+      state.loading = true
+    },
+    logoutSuccess: (state) => {
+      state.isAuthenticated = false;
+      state.loading = false;
+      state.error = null;
+    },
+    logoutFailure(state, action: PayloadAction<string>){
+      state.error = action.payload;
+      state.loading = false;
+    }
   },
 });
 
@@ -66,7 +81,10 @@ export const {
   signupFailure,
   logoutRequest,
   sendOtpRequest,
-  changePasswordRequest
+  changePasswordRequest,
+  clearState,
+  logoutSuccess,
+  logoutFailure
 } = authSlice.actions;
 
 export default authSlice.reducer;

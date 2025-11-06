@@ -17,15 +17,18 @@ import {
   signupFailure,
   logoutRequest,
   sendOtpRequest,
-  changePasswordRequest
+  changePasswordRequest,
+  logoutSuccess,
+  logoutFailure,
 } from './authSlice';
 import {
   login,
   signup,
-  refreshAccessToken,
   getUserInfo,
   sendOtp,
   changePassword,
+  logout,
+  refreshAccessToken,
 } from '../../api/auth';
 import { RootState } from '../../store/store';
 import { Alert } from 'react-native';
@@ -37,12 +40,15 @@ import { eventBus } from '../../../../shared-types/utils/eventBus';
 function* handleLogin(action: ReturnType<typeof loginRequest>): SagaIterator {
   try {
     const response = yield call(login, action.payload);
+    console.log('[saga] response from api: ', response);
     yield call(hostSession.setTokens, response);
     const tokens = yield call(hostSession.getTokens);
-    // console.log('saved token: ', tokens.accessToken );
+    console.log('[saga] token from storage: ', tokens);
     const user = yield call(getUserInfo, tokens.accessToken);
-    // console.log('user in saga: ',user);
+    console.log('[saga] user from api', user);
     yield call(hostSession.setUser, user);
+    const userStorage = yield call(hostSession.getUser);
+    console.log('[saga] user from storage: ', userStorage);
     yield put(loginSuccess());
   } catch (error: any) {
     console.log('Login failed:', error.message);
@@ -56,10 +62,26 @@ function* handleSignup(action: ReturnType<typeof signupRequest>) {
   try {
     yield call(signup, action.payload);
     yield put(signupSuccess());
+    Alert.alert('Đăng ký thành công');
   } catch (error: any) {
-    console.log('Sign up failed:', error.message);
-    // showError(error.message);
-    yield put(signupFailure());
+    const message =
+      error.response?.data?.message || error.message || 'Có lỗi xảy ra';
+    yield put(signupFailure(message));
+    Alert.alert('Đăng ký thất bại', message);
+  }
+}
+
+function* handleLogoutSaga(action: ReturnType<typeof logoutRequest>) {
+  try {
+    yield call(logout, action.payload);
+    yield call(hostSession.clearUser);
+    yield call(hostSession.clearTokens);
+    yield put(logoutSuccess());
+  } catch (error: any) {
+    const message =
+      error.response?.data?.message || error.message || 'Có lỗi xảy ra';
+    yield put(logoutFailure(message));
+    Alert.alert('Đăng xuất thất bại', message);
   }
 }
 
@@ -73,8 +95,6 @@ function* sendOtpSaga(action: ReturnType<typeof sendOtpRequest>) {
 
 function* changePasswordSaga(action: ReturnType<typeof changePasswordRequest>) {
   try {
-    console.log('[saga] change pass called');
-    
     yield call(changePassword, action.payload);
   } catch (error: any) {
     console.log('change password failed:', error.message);
@@ -86,15 +106,16 @@ function* watchAuth() {
   yield takeLatest(signupRequest.type, handleSignup);
   yield takeLatest(sendOtpRequest.type, sendOtpSaga);
   yield takeLatest(changePasswordRequest.type, changePasswordSaga);
+  yield takeLatest(logoutRequest.type, handleLogoutSaga);
 }
 
 // Xử lý tự động log out khi access token đã hết hạn
 function* watchAccessTokenExpiry(): SagaIterator {
   while (true) {
     const state: RootState = yield select();
-    const { expiresIn, refreshTokenExpiresIn, refreshToken } = state.auth;
+    const { expiresIn, refreshToken } = state.auth;
 
-    if (!expiresIn || !refreshTokenExpiresIn) {
+    if (!expiresIn || !refreshToken) {
       yield delay(5000);
       continue;
     }
@@ -110,7 +131,7 @@ function* watchAccessTokenExpiry(): SagaIterator {
 
         yield put(loginSuccess());
 
-        // 🔹 Bắn event để các remote cập nhật token
+        // Bắn event để các remote cập nhật token
         eventBus.emit('TOKEN_UPDATED', newTokens);
 
         console.log('[AuthSaga] Token refreshed successfully');
@@ -118,7 +139,7 @@ function* watchAccessTokenExpiry(): SagaIterator {
         console.error('[AuthSaga] Refresh failed:', err.message);
         // refresh token hết hạn hoặc lỗi → logout
         yield call(hostSession.clearTokens);
-        yield put(logoutRequest());
+        yield put(logoutRequest(refreshToken));
       }
     } else {
       // refresh 5s trước khi hết hạn

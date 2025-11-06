@@ -1,10 +1,16 @@
 export type BankStackParamsList = {
   Bank: undefined;
   AccountDetail: undefined;
-  Account: { accountId: string };
+  // Account: undefined;
   TransactionHistory: undefined;
   TransferFlow: undefined;
+  // LockedAccounts: undefined;
 };
+
+export type AccountStackParamsList = {
+  Account: undefined;
+  LockedAccounts: undefined;
+}
 
 export type TransferStackParamsList = {
   ChooseBank: { fromAccountId: string };

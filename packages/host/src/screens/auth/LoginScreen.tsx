@@ -13,6 +13,7 @@ import { RootStackParamsList } from '../../navigation/RootNavigation';
 import { AuthContext } from '../../saga/auth/AuthContext';
 import type { RootState, AppDispatch } from '../../store/store';
 import Color from './../../themes/Color';
+import { hostSession } from '../../utils/hostStorage';
 
 type LoginScreenNavigationProp = StackNavigationProp<
   RootStackParamsList,
@@ -24,7 +25,9 @@ interface LoginScreenProps {
 }
 
 const LoginScreen = ({ navigation }: LoginScreenProps) => {
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth);
+  const { isAuthenticated, refreshToken } = useSelector(
+    (state: RootState) => state.auth,
+  );
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [focusedInput, setFocusedInput] = useState<string | null>(null);
@@ -34,6 +37,16 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
       logIn({ email, password });
     }
   };
+
+  useEffect(() => {
+    const test = async () => {
+      const token = await hostSession.getTokens();
+      const user = await hostSession.getUser();
+      console.log('[screen] token when mount: ', token);
+      console.log('[screen] user when mount: ', user);
+    };
+    test();
+  }, [refreshToken]);
 
   useEffect(() => {
     if (isAuthenticated) {
@@ -67,7 +80,13 @@ const LoginScreen = ({ navigation }: LoginScreenProps) => {
         onFocus={() => setFocusedInput('password')}
         onBlur={() => setFocusedInput(null)}
       />
-      <View style={{ justifyContent: 'flex-end', flexDirection: 'row', width: '100%'}}>
+      <View
+        style={{
+          justifyContent: 'flex-end',
+          flexDirection: 'row',
+          width: '100%',
+        }}
+      >
         <TouchableOpacity
           style={{
             position: 'relative',
