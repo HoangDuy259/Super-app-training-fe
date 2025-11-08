@@ -1,15 +1,19 @@
 export type BankStackParamsList = {
   Bank: undefined;
   AccountDetail: undefined;
-  // Account: undefined;
+  Account: undefined;
   TransactionHistory: undefined;
   TransferFlow: undefined;
-  // LockedAccounts: undefined;
+  LockedAccounts: undefined;
+  ChangePassword: undefined
+  NewAccount: undefined;
 };
 
 export type AccountStackParamsList = {
   Account: undefined;
   LockedAccounts: undefined;
+  ChangePassword: undefined;
+  NewAccount: undefined;
 }
 
 export type TransferStackParamsList = {

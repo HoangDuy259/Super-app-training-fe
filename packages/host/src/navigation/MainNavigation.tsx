@@ -4,7 +4,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 // import BankNavigation from '../../../bank/src/navigation/BankNavigation';
 import StockScreen from '../screens/StockScreen';
 import BankScreen from '../screens/bank/BankScreen';
-import AccountScreen from '../screens/bank/account/AccountScreen'
+import AccountScreen from '../../../bank/src/screens/account/AccountScreen'
 
 export type MainTabParamsList = {
   Home: undefined;

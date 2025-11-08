@@ -73,6 +73,8 @@ export default env => {
               './screens/AccountScreen': './src/screens/account/AccountScreen',
               './screens/AccountDetailScreen': './src/screens/account/AccountDetailScreen',
               './screens/LockedAccountsScreen': './src/screens/account/LockedAccountsScreen',
+              './screens/ChangePasswordScreen': './src/screens/account/ChangePasswordScreen',
+              './screens/NewAccountScreen': './src/screens/account/NewAccountScreen',
               // transfer
               './screens/ChooseBankScreen':
                 './src/screens/transfer/ChooseBankScreen',
@@ -87,6 +89,7 @@ export default env => {
               './store/accountSlice': './src/store/slices/accountSlice',
               './store/transferSlice': './src/store/slices/transferSlice',
               './store/transactionSlice': './src/store/slices/transactionSlice',
+              './store/userSlice': './src/store/slices/userSlice',
               './sagas': './src/sagas/index.ts',
             },
         remotes: {

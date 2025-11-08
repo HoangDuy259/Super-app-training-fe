@@ -43,7 +43,7 @@ function* createTransaction(
 
 function* verifyTransferSaga(action: ReturnType<typeof verifyTransferRequest>): SagaIterator {
   try {
-    const result: boolean = yield call(bankApi.authenticateTransfer, action.payload);
+    const result: boolean = yield call(bankApi.vertifyUser, action.payload);
     yield put(verifyTransferSuccess(result));
   } catch (error: any) {
     yield put(verifyTransferFailure(error.message || 'Xác thực thất bại'));

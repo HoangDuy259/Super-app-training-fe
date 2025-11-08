@@ -6,6 +6,14 @@ import {
   getAccountRequest,
   handleAccountStatusRequest,
   handleAccountStatusSuccess,
+  createFirstAccountRequest,
+  createFirstAccountSuccess,
+  createFirstAccountFailure,
+  searchAccountSuccess,
+  suggestAccountSuccess,
+  searchAccountFailure,
+  searchAccountRequest,
+  suggestAccountRequest,
 } from '../store/slices/accountSlice';
 import type { SagaIterator } from 'redux-saga';
 
@@ -45,8 +53,57 @@ function* handleAccountStatusSaga(
   }
 }
 
+function* createFirstAccountSaga(action: ReturnType<typeof createFirstAccountRequest>): SagaIterator{
+  try{
+    const response = yield call(() => bankApi.createAccount(action.payload));
+    yield put(createFirstAccountSuccess(response))
+  }catch(error: any){
+    console.log(error);
+    yield put(createFirstAccountFailure(error))
+    
+  }
+}
+
+function* searchAccountSaga(action: ReturnType<typeof searchAccountRequest>): SagaIterator {
+  try {
+    const { q, type } = action.payload;
+
+    let result: string[] = [];
+
+    if (type === 'contains') {
+      result = yield call(bankApi.searchSimilarAccountNumbers, q);
+    } else {
+      result = yield call(bankApi.suggestAccountNumbers, q, 10);
+    }
+
+    if (type === 'contains') {
+      yield put(searchAccountSuccess(result));
+    } else {
+      yield put(suggestAccountSuccess(result));
+    }
+  } catch (error: any) {
+    const msg = error.response?.data?.message || 'Lỗi tìm kiếm tài khoản';
+    yield put(searchAccountFailure(msg));
+  }
+}
+
+function* suggestAccountSaga(action: ReturnType<typeof suggestAccountRequest>): SagaIterator {
+  try {
+    const result: string[] = yield call(bankApi.suggestAccountNumbers, action.payload, 10);
+    console.log('saga, res: ', result);
+    
+    yield put(suggestAccountSuccess(result));
+  } catch (error: any) {
+    const msg = error.response?.data?.message || 'Lỗi gợi ý số tài khoản';
+    yield put(searchAccountFailure(msg));
+  }
+}
+
 export default function* accountSaga() {
   yield takeLatest(getAccountRequest.type, fetchBankAccountsSaga);
   yield takeLatest(handleAccountStatusRequest.type, handleAccountStatusSaga);
+  yield takeLatest(createFirstAccountRequest.type, createFirstAccountSaga);
+  yield takeLatest(searchAccountRequest.type, searchAccountSaga);
+  yield takeLatest(suggestAccountRequest.type, suggestAccountSaga);
   // Thêm watchers khác nếu cần (search, etc.)
 }

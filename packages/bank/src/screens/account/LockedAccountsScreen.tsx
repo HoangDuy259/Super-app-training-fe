@@ -6,14 +6,19 @@ import {
   ScrollView,
   StyleSheet,
   SafeAreaView,
+  Alert,
 } from 'react-native';
 import Color from '../../themes/Color';
-import { AccountStackParamsList, BankStackParamsList } from '../../navigation/bank.types';
+import {
+  AccountStackParamsList,
+  BankStackParamsList,
+} from '../../navigation/bank.types';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../host/src/store/store';
 import Icon from 'react-native-vector-icons/FontAwesome6';
-
+import { handleAccountStatusRequest } from '../../store/slices/accountSlice';
+import { BankAccount } from '../../../../shared-types';
 
 type LockedAccountScreenNavigationProp = StackNavigationProp<
   AccountStackParamsList,
@@ -24,17 +29,46 @@ interface LockedAccountScreenProps {
   navigation: LockedAccountScreenNavigationProp;
 }
 
-const LockedAccountsScreen = ({navigation}: LockedAccountScreenProps) => {
+const LockedAccountsScreen = ({ navigation }: LockedAccountScreenProps) => {
   // Dữ liệu mẫu – bạn sẽ thay bằng props hoặc state thật
-  const { accounts } = useSelector((state: RootState) => state.accountUI);
+  // const { accounts } = useSelector((state: RootState) => state.accountUI);
+  const dispatch = useDispatch();
 
-  const lockedAccounts = useCallback(() => {
-    return accounts.filter(acc => acc.status === 'INACTIVE');
-  }, [accounts]);
+  const lockedAccounts = useSelector(
+    (state: RootState) =>
+      state.accountUI.accounts.filter(acc => acc.status === 'INACTIVE'),
+    shallowEqual,
+  );
 
-  const handleUnlock = (id: string) => {
-    
-    console.log('Mở khóa tài khoản:', id);
+  const handleUnlock = (acc: BankAccount) => {
+    if (!acc) return;
+
+    const req = {
+      account: acc,
+      status: acc.status,
+    };
+
+    // Nếu tài khoản còn tiền và đang hoạt động
+    // if (acc.balance > 0 && acc.status === 'ACTIVE') {
+    //   Alert.alert(
+    //     'Cảnh báo',
+    //     'Số dư trong tài khoản vẫn còn, bạn có chắc muốn khóa thẻ?',
+    //     [
+    //       { text: 'Hủy', style: 'cancel' },
+    //       {
+    //         text: 'Xác nhận',
+    //         style: 'destructive',
+    //         onPress: () => {
+    //           dispatch(handleAccountStatusRequest(req));
+    //         },
+    //       },
+    //     ],
+    //     { cancelable: true },
+    //   );
+    // }
+    // else {
+    dispatch(handleAccountStatusRequest(req));
+    // }
   };
 
   return (
@@ -66,21 +100,23 @@ const LockedAccountsScreen = ({navigation}: LockedAccountScreenProps) => {
         style={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        {lockedAccounts().length === 0 ? (
+        {lockedAccounts.length === 0 ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyText}>Không có tài khoản bị khóa</Text>
           </View>
         ) : (
-          lockedAccounts().map(acc => (
+          lockedAccounts.map(acc => (
             <View key={acc.id} style={styles.accountItem}>
               <View style={styles.accountInfo}>
+                <Text style={styles.label}>Số tài khoản</Text>
                 <Text style={styles.accountNumber}>{acc.accountNumber}</Text>
+                <Text style={styles.label}>Số dư</Text>
                 <Text style={styles.accountBalance}>{acc.balance} VND</Text>
               </View>
 
               <TouchableOpacity
                 style={styles.unlockButton}
-                onPress={() => handleUnlock(acc.id)}
+                onPress={() => handleUnlock(acc)}
               >
                 <Text style={styles.unlockButtonText}>Mở khóa</Text>
               </TouchableOpacity>
@@ -95,18 +131,17 @@ const LockedAccountsScreen = ({navigation}: LockedAccountScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: Color.lightBg,
+    paddingTop: 30,
+    backgroundColor: Color.whiteText,
   },
 
   // === HEADER ===
   header: {
-    height: 70,
-    backgroundColor: Color.boldBg,
+    position: 'relative',
+    paddingVertical: 12,
     justifyContent: 'center',
-    alignItems: 'center',
-    borderBottomWidth: 1,
-    borderBottomColor: Color.boldLine,
-    paddingTop: 10,
+    borderBottomWidth: 0.5,
+    borderColor: Color.boldLine,
   },
 
   btnClose: {
@@ -127,7 +162,7 @@ const styles = StyleSheet.create({
   },
 
   accountItem: {
-    backgroundColor: Color.opacityBg,
+    backgroundColor: Color.whiteText,
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
@@ -144,13 +179,18 @@ const styles = StyleSheet.create({
   accountNumber: {
     fontSize: 18,
     fontWeight: '700',
-    color: Color.whiteText,
+    color: Color.primaryText,
+    marginBottom: 4,
+  },
+  label: {
+    fontSize: 16,
+    color: Color.subText,
     marginBottom: 4,
   },
   accountBalance: {
     fontSize: 20,
     fontWeight: '600',
-    color: Color.whiteText,
+    color: Color.primaryText,
   },
 
   unlockButton: {

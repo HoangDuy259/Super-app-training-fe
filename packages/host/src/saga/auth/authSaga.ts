@@ -29,6 +29,7 @@ import {
   changePassword,
   logout,
   refreshAccessToken,
+  createFirstAccount,
 } from '../../api/auth';
 import { RootState } from '../../store/store';
 import { Alert } from 'react-native';

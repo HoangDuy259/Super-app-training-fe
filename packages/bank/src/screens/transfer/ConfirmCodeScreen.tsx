@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Modal,
@@ -80,17 +80,20 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
     setModalVisible(true);
   };
 
+  const hasProcessed = useRef(false);
+
   useEffect(() => {
-    if (isVerified) {
+    if (isVerified && !hasProcessed.current) {
+      hasProcessed.current = true;
       const transfer = {
         fromAccountId: currentAccount?.id || null,
         toAccountId: destinationAccount?.id || null,
         amount,
         description: note,
       };
+      dispatch(resetState())
       dispatch(createTransactionRequest(transfer));
       setModalVisible(false);
-      dispatch(resetState())
       navigation.navigate('TransactionStatus');
     }
   }, [isVerified]);
