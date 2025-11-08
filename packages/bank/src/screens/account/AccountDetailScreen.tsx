@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../../themes/Color';
 import { formatCurrency, formatDate } from '../../utils/formatter';
@@ -189,13 +183,13 @@ const AccountDetail = ({ navigation }: AccountDetailScreenProps) => {
             style: 'destructive',
             onPress: () => {
               dispatch(handleAccountStatusRequest(req));
+              navigation.replace('Bank');
             },
           },
         ],
         { cancelable: true },
       );
-    }
-    else {
+    } else {
       dispatch(handleAccountStatusRequest(req));
     }
   };

@@ -35,13 +35,3 @@ export interface TransferRequest {
   amount: number;
   description: string;
 }
-
-export interface AuthenticateRequest {
-  email: string | null;
-  password: string | null;
-}
-
-// export interface CreateTransactionPayload {
-//   auth: AuthenticateRequest;
-//   transfer: TransferRequest;
-// }

@@ -18,12 +18,16 @@ import { BankStackParamsList } from '../navigation/bank.types';
 import { moreServiceTab, staticTab } from '../constant/bankScreen';
 import { remoteStorage } from '../store/storage/remoteStorage';
 import { LoginResponse, UserInfo } from '../../../shared-types';
-import { useDispatch, useSelector } from 'react-redux';
+import { shallowEqual, useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../host/src/store/store';
-import { getAccountRequest } from '../store/slices/accountSlice';
+import {
+  createFirstAccountRequest,
+  getAccountRequest,
+} from '../store/slices/accountSlice';
 import { selectAccount } from '../store/slices/accountSlice';
 import { clearDestinationAccount } from '../store/slices/transferSlice';
 import { eventBus } from '../../../shared-types/utils/eventBus';
+import { createFirstAccount } from '../../../host/src/api/auth';
 
 type BankScreenNavigationProp = StackNavigationProp<
   BankStackParamsList,
@@ -41,17 +45,17 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   const [token, setToken] = useState<LoginResponse | null>(null);
 
   const dispatch = useDispatch();
-  const { accounts, loading } = useSelector(
-    (state: RootState) => state.accountUI || {},
-  );
+  const { loading } = useSelector((state: RootState) => state.accountUI || {});
   const { currentAccount } = useSelector((state: RootState) => state.accountUI);
   const { currentTransaction } = useSelector(
     (state: RootState) => state.transactionUI,
   );
 
-  const activeAccounts = useMemo(() => {
-    return accounts.filter(acc => acc.status === 'ACTIVE');
-  }, [accounts]);
+  const activeAccounts = useSelector(
+    (state: RootState) =>
+      state.accountUI.accounts.filter(acc => acc.status === 'ACTIVE'),
+    shallowEqual,
+  );
 
   console.log('[REMOTE] BankScreen RENDERED!');
 
@@ -79,6 +83,13 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
 
     initBankData();
   }, [dispatch]);
+  
+  const { accounts } = useSelector((state: RootState) => state.accountUI);
+  useEffect(() => {
+    if (accounts.length < 1) {
+      dispatch(createFirstAccountRequest(token?.accessToken!));
+    }
+  }, []);
 
   useEffect(() => {
     dispatch(clearDestinationAccount());
@@ -252,37 +263,40 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
       <ScrollView style={styles.container}>
         {/* header */}
         <View style={styles.headerInfoWrapper}>
-          <View style={styles.headerInfoUser}>
-            <View
-              style={{
-                width: 40,
-                height: 40,
-                borderRadius: 25,
-                backgroundColor: '#fff',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: 10,
-              }}
-            >
-              <Icon name="user" size={24} color={Color.lightBg} />
-            </View>
-
-            <View style={{ flexDirection: 'column' }}>
-              <Text style={{ marginRight: 12, color: Color.whiteText }}>
-                Xin chào {user?.firstName}
-              </Text>
-              <Text
+          <TouchableOpacity onPress={() => navigation.navigate('Account')}>
+            <View style={styles.headerInfoUser}>
+              <View
                 style={{
-                  color: Color.whiteText,
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  flex: 1,
+                  width: 40,
+                  height: 40,
+                  borderRadius: 25,
+                  backgroundColor: '#fff',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: 10,
                 }}
               >
-                {user?.lastName}
-              </Text>
+                <Icon name="user" size={24} color={Color.lightBg} />
+              </View>
+
+              <View style={{ flexDirection: 'column' }}>
+                <Text style={{ marginRight: 12, color: Color.whiteText }}>
+                  Xin chào {user?.firstName}
+                </Text>
+                <Text
+                  style={{
+                    color: Color.whiteText,
+                    fontWeight: 700,
+                    textTransform: 'uppercase',
+                    flex: 1,
+                  }}
+                >
+                  {user?.lastName}
+                </Text>
+              </View>
             </View>
-          </View>
+          </TouchableOpacity>
+
           <View style={styles.headerInfoNoti}>
             <Icon name="bell" size={24} color="#fff" />
           </View>

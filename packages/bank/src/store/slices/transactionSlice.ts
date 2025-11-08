@@ -3,9 +3,7 @@ import {
   TransactionState,
   Transaction,
   TransferRequest,
-  // AuthenticateRequest,
-  // CreateTransactionPayload,
-  LoginPayload,
+  VerifyUserRequest,
 } from '../../../../shared-types';
 
 const initialState: TransactionState = {
@@ -48,7 +46,7 @@ const transactionSlice = createSlice({
       state.error = action.payload;
     },
 
-    verifyTransferRequest(state, action: PayloadAction<LoginPayload>) {
+    verifyTransferRequest(state, action: PayloadAction<VerifyUserRequest>) {
       state.loading = true;
     },
     verifyTransferSuccess(state, action: PayloadAction<boolean>) {

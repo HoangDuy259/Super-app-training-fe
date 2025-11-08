@@ -1,5 +1,6 @@
 import axios from 'axios';
 import {
+  BankAccount,
   ForgotPassword,
   LoginPayload,
   LoginResponse,
@@ -11,7 +12,7 @@ export const API_URL = 'http://10.0.2.2:8080/superApp';
 
 export const login = async (data: LoginPayload): Promise<LoginResponse> => {
   console.log('[api]', data);
-  
+
   const response = await axios.post(`${API_URL}/auth/login`, data);
   const result = response.data.result;
 
@@ -28,8 +29,13 @@ export const login = async (data: LoginPayload): Promise<LoginResponse> => {
 
 export const signup = async (data: SignupPayload) => {
   console.log('api, data: ', data);
+
+  const response = await axios.post<{
+    messsage: string;
+    result: SignupPayload;
+  }>(`${API_URL}/auth/register`, data);
+  console.log('api, res', response);
   
-  const response = await axios.post<{messsage: string, result: SignupPayload}>(`${API_URL}/auth/register`, data);
   if (!response.data.result) {
     console.log('api error', response.data.messsage);
     throw new Error(response.data.messsage);
@@ -37,13 +43,14 @@ export const signup = async (data: SignupPayload) => {
   return response.data.result;
 };
 
-
 export const logout = async (refreshToken: string) => {
   console.log('[api] recieved refresh token ', refreshToken);
-  
-  const response = await axios.post(`${API_URL}/auth/logout?refreshToken=${refreshToken}`);
+
+  const response = await axios.post(
+    `${API_URL}/auth/logout?refreshToken=${refreshToken}`,
+  );
   console.log(response.status);
-  
+
   if (response.status !== 200) {
     throw new Error('Đăng xuất không được');
   }
@@ -104,9 +111,17 @@ export const changePassword = async (
   data: ForgotPassword,
 ): Promise<boolean> => {
   console.log('[api] called', data);
-  const {email, otp, newPassword} = data
   const res = await axios.post(`${API_URL}/auth/reset`, data);
   console.log('[api] res: ', res);
 
   return res.status === 200;
+};
+
+// create first account
+export const createFirstAccount = async (): Promise<BankAccount> => {
+  const response = await axios.post<{
+    message: string;
+    result: BankAccount;
+  }>('bank-accounts');
+  return response.data.result;
 };

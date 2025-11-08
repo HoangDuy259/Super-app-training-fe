@@ -10,7 +10,10 @@ import {
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AccountStackParamsList, BankStackParamsList } from '../../navigation/bank.types';
+import {
+  AccountStackParamsList,
+  BankStackParamsList,
+} from '../../navigation/bank.types';
 import { remoteStorage } from '../../store/storage/remoteStorage';
 import { LoginResponse, UserInfo } from '../../../../shared-types';
 import { useDispatch } from 'react-redux';
@@ -212,7 +215,11 @@ const AccountScreen = ({ navigation }: AccountScreenProps) => {
 
         {/* Actions */}
         <View style={styles.actionSection}>
-          <TouchableOpacity style={styles.actionButton} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.actionButton}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('ChangePassword')}
+          >
             <Icon name="key" size={18} color={Color.primary} />
             <Text style={styles.actionText}>Đổi mật khẩu</Text>
             <Icon name="chevron-right" size={16} color={Color.subText} />
@@ -225,6 +232,16 @@ const AccountScreen = ({ navigation }: AccountScreenProps) => {
           >
             <Icon name="lock" size={18} color={Color.primary} />
             <Text style={styles.actionText}>Tài khoản đã khóa</Text>
+            <Icon name="chevron-right" size={16} color={Color.subText} />
+          </TouchableOpacity>
+          
+          <TouchableOpacity
+            style={styles.actionButton}
+            activeOpacity={0.7}
+            onPress={() => navigation.navigate('NewAccount')}
+          >
+            <Icon name="plus" size={18} color={Color.primary} />
+            <Text style={styles.actionText}>Tạo tài khoản</Text>
             <Icon name="chevron-right" size={16} color={Color.subText} />
           </TouchableOpacity>
 

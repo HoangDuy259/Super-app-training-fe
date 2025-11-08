@@ -12,11 +12,13 @@ declare module 'bank/screens/transfer/ConfirmCodeScreen';
 // screen/bank/account
 declare module 'bank/screens/account/AccountScreen';
 declare module 'bank/screens/LockedAccountsScreen';
+declare module 'bank/screens/ChangePasswordScreen';
 
 // slices:
 declare module 'bank/store/transferSlice'
 declare module 'bank/store/accountSlice'
 declare module 'bank/store/transactionSlice'
+declare module 'bank/store/userSlice'
 // sagas:
 declare module 'bank/sagas'
 // thêm các module khác ở đây

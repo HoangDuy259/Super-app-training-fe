@@ -13,6 +13,8 @@ export interface BankAccount {
 export interface AccountUIState {
   currentAccount: BankAccount | null;
   accounts: BankAccount[];
+  suggestions: string[];
+  similar: string[];
   loading: boolean;
   error: string | null;
 }
