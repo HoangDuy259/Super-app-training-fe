@@ -21,7 +21,7 @@ import { logoutRequest } from '../../../../host/src/saga/auth/authSlice';
 import { hostSession } from '../../../../host/src/utils/hostStorage';
 
 type AccountScreenNavigationProp = StackNavigationProp<
-  AccountStackParamsList,
+  BankStackParamsList,
   'Account'
 >;
 
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: Color.primary,
+    backgroundColor: Color.secondBg,
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 12,
@@ -78,7 +78,7 @@ const styles = StyleSheet.create({
   username: {
     fontSize: 18,
     fontWeight: '600',
-    color: Color.primaryText,
+    color: Color.secondBg,
   },
 
   // Info Section
@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
     marginLeft: 12,
     fontSize: 16,
     fontWeight: '500',
-    color: Color.primary,
+    color: Color.primaryText,
   },
 });
 
@@ -220,7 +220,7 @@ const AccountScreen = ({ navigation }: AccountScreenProps) => {
             activeOpacity={0.7}
             onPress={() => navigation.navigate('ChangePassword')}
           >
-            <Icon name="key" size={18} color={Color.primary} />
+            <Icon name="key" size={18} color={Color.primaryText} />
             <Text style={styles.actionText}>Đổi mật khẩu</Text>
             <Icon name="chevron-right" size={16} color={Color.subText} />
           </TouchableOpacity>
@@ -230,17 +230,17 @@ const AccountScreen = ({ navigation }: AccountScreenProps) => {
             activeOpacity={0.7}
             onPress={() => navigation.navigate('LockedAccounts')}
           >
-            <Icon name="lock" size={18} color={Color.primary} />
+            <Icon name="lock" size={18} color={Color.primaryText} />
             <Text style={styles.actionText}>Tài khoản đã khóa</Text>
             <Icon name="chevron-right" size={16} color={Color.subText} />
           </TouchableOpacity>
-          
+
           <TouchableOpacity
             style={styles.actionButton}
             activeOpacity={0.7}
             onPress={() => navigation.navigate('NewAccount')}
           >
-            <Icon name="plus" size={18} color={Color.primary} />
+            <Icon name="plus" size={18} color={Color.primaryText} />
             <Text style={styles.actionText}>Tạo tài khoản</Text>
             <Icon name="chevron-right" size={16} color={Color.subText} />
           </TouchableOpacity>

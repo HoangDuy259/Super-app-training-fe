@@ -3,6 +3,7 @@ import { TransactionStatus } from "./enums/TransactionStatus.enum";
 import { BankAccount } from "./account.types";
 
 export interface Transaction {
+  id: string,
   amount: number;
   sourceAccountNumber: string;
   destinationAccountNumber: string;

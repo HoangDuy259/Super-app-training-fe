@@ -13,7 +13,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../../themes/Color';
 import axios from 'axios';
 import { StackNavigationProp } from '@react-navigation/stack';
-import { AccountStackParamsList } from '../../navigation/bank.types';
+import { AccountStackParamsList, BankStackParamsList } from '../../navigation/bank.types';
 import { BankAccount } from '../../../../shared-types';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../../../host/src/store/store';
@@ -24,7 +24,7 @@ const API_BASE = 'http://localhost:8080/api/bank-accounts';
 type FilterType = 'startsWith' | 'contains';
 
 type AccountScreenNavigationProp = StackNavigationProp<
-  AccountStackParamsList,
+  BankStackParamsList,
   'NewAccount'
 >;
 
@@ -192,7 +192,7 @@ const formatAccountNumber = (num: string) =>
 
 // Styles
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff', paddingTop: 30 },
   header: {
     position: 'relative',
     paddingVertical: 12,

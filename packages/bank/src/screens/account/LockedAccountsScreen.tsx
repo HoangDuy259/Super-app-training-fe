@@ -21,7 +21,7 @@ import { handleAccountStatusRequest } from '../../store/slices/accountSlice';
 import { BankAccount } from '../../../../shared-types';
 
 type LockedAccountScreenNavigationProp = StackNavigationProp<
-  AccountStackParamsList,
+  BankStackParamsList,
   'LockedAccounts'
 >;
 

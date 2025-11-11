@@ -9,6 +9,7 @@ import AccountScreen from '../screens/account/AccountScreen';
 import LockedAccountsScreen from '../screens/account/LockedAccountsScreen';
 import ChangePasswordScreen from '../screens/account/ChangePasswordScreen';
 import NewAccountScreen from '../screens/account/NewAccountScreen';
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 const Stack = createStackNavigator();
 

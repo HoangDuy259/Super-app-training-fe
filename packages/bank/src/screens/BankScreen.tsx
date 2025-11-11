@@ -9,8 +9,9 @@ import {
   Image,
   NativeSyntheticEvent,
   NativeScrollEvent,
+  Platform,
 } from 'react-native';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Icon from 'react-native-vector-icons/FontAwesome6';
 import Color from '../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
@@ -27,7 +28,7 @@ import {
 import { selectAccount } from '../store/slices/accountSlice';
 import { clearDestinationAccount } from '../store/slices/transferSlice';
 import { eventBus } from '../../../shared-types/utils/eventBus';
-import { createFirstAccount } from '../../../host/src/api/auth';
+import { resetState } from '../store/slices/transactionSlice';
 
 type BankScreenNavigationProp = StackNavigationProp<
   BankStackParamsList,
@@ -75,7 +76,6 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
         }
 
         dispatch(getAccountRequest(userInfo.id));
-        // dispatch(selectAccount(activeAccounts[0]));
       } catch (error) {
         console.error('[REMOTE] Init error:', error);
       }
@@ -83,16 +83,26 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
 
     initBankData();
   }, [dispatch]);
-  
+
   const { accounts } = useSelector((state: RootState) => state.accountUI);
-  useEffect(() => {
-    if (accounts.length < 1) {
-      dispatch(createFirstAccountRequest(token?.accessToken!));
-    }
-  }, []);
+  const hasCreated = useRef(false);
+
+useEffect(() => {
+  if (
+    !hasCreated.current &&
+    accounts.length < 1 &&
+    !loading &&
+    token?.accessToken
+  ) {
+    dispatch(createFirstAccountRequest(token.accessToken));
+    hasCreated.current = true;
+  }
+}, [accounts, loading, token]);
+
 
   useEffect(() => {
     dispatch(clearDestinationAccount());
+    dispatch(resetState())
   }, []);
 
   useEffect(() => {
@@ -115,12 +125,9 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
   }, [setToken]);
 
   // handle scroll end action
-  // const [currentIndex, setCurrentIndex] = useState(0);
   const handleScrollEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetX = e.nativeEvent.contentOffset.x;
     const index = Math.round(offsetX / width);
-    // setCurrentIndex(index);
-    // console.log('index: ', index);
 
     dispatch(selectAccount(activeAccounts[index]));
   };
@@ -130,303 +137,340 @@ const BankScreen = ({ navigation }: BankScreenProps) => {
     console.log('[remote] current transaction: ', currentTransaction);
   }, [currentAccount]);
 
-  if (loading) {
-    return <Text>LOADING ACCOUNTS....</Text>;
-  }
   const styles = StyleSheet.create({
-    safeContainer: {
-      flex: 1,
-      flexDirection: 'column',
-    },
-
     container: {
       flex: 1,
-      paddingTop: 30,
+      backgroundColor: Color.whiteText,
+      paddingTop: 30
     },
-
-    // header css
-    headerInfoWrapper: {
-      justifyContent: 'space-between',
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
       alignItems: 'center',
-      backgroundColor: Color.boldBg,
+      backgroundColor: Color.whiteText,
+    },
+    loadingText: {
+      fontSize: 16,
+      color: Color.subText,
+    },
+    header: {
       flexDirection: 'row',
-      padding: 8,
-    },
-
-    headerInfoUser: {
-      flexDirection: 'row',
-      alignContent: 'center',
-      flex: 1,
-    },
-
-    headerInfoNoti: {},
-
-    // content css
-    contentContainer: {
-      flexDirection: 'column',
-      flex: 1,
-      height: '100%',
-    },
-
-    bankAccountListWrapper: {
-      padding: 8,
-      flexDirection: 'column',
+      alignItems: 'center',
       justifyContent: 'space-between',
+      padding: 16,
       backgroundColor: Color.lightBg,
     },
-
-    bankAccountList: {
-      paddingVertical: 12,
+    userInfo: {
+      flexDirection: 'row',
+      alignItems: 'center',
     },
-
-    bankAccountItem: {
-      paddingLeft: 8,
+    avatar: {
+      width: 48,
+      height: 48,
+      borderRadius: 24,
+      backgroundColor: Color.whiteText,
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginRight: 12,
     },
-
-    bankAccountItemController: {
+    greeting: {
+      fontSize: 15,
+      color: Color.whiteText,
+      fontWeight: '500',
+    },
+    userName: {
+      fontSize: 18,
+      color: Color.whiteText,
+      fontWeight: '700',
+      textTransform: 'uppercase',
+    },
+    notification: {
+      padding: 8,
+    },
+    accountSection: {
+      backgroundColor: Color.lightBg,
+      paddingBottom: 32,
+    },
+    accountScroll: {
+      marginTop: 16,
+    },
+    accountCard: {
+      paddingHorizontal: 24,
+      justifyContent: 'center',
+    },
+    activeAccountCard: {
+      borderRadius: 16,
+      marginHorizontal: 8,
+    },
+    accountNumber: {
+      fontSize: 16,
+      color: Color.whiteText,
+      fontWeight: '600',
+      marginBottom: 8,
+    },
+    accountBalance: {
+      fontSize: 32,
+      color: Color.whiteText,
+      fontWeight: '800',
+    },
+    currency: {
+      fontSize: 24,
+      fontWeight: '600',
+      color: Color.whiteText,
+    },
+    actionButtons: {
       flexDirection: 'row',
       justifyContent: 'space-around',
-      paddingTop: 20,
-      paddingBottom: 35,
+      marginTop: 24,
+      paddingHorizontal: 16,
     },
-
-    buttonController: {
-      flexDirection: 'column',
-      justifyContent: 'space-between',
+    actionButton: {
       alignItems: 'center',
+      flex: 1,
     },
-
-    buttonControllerIcon: {
-      backgroundColor: Color.btnBg,
-      borderRadius: 100,
-      width: 50,
-      height: 50,
-      alignItems: 'center',
+    actionIcon: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: 'rgba(255, 255, 255, 0.3)',
       justifyContent: 'center',
-      marginBottom: 12,
+      alignItems: 'center',
+      marginBottom: 8,
     },
-
-    textController: {
+    actionLabel: {
+      fontSize: 13,
       color: Color.whiteText,
-      fontSize: 12,
+      fontWeight: '600',
     },
-
-    serviceContainer: {
-      padding: 8,
-      flexDirection: 'column',
-      backgroundColor: Color.btnBg,
+    servicesSection: {
+      padding: 16,
     },
-    staticTabContainer: {
+    staticTabsCard: {
       backgroundColor: Color.whiteText,
       borderRadius: 20,
-      flexDirection: 'column',
-      alignItems: 'center',
-      paddingVertical: 4,
+      paddingVertical: 16,
       marginTop: -30,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+        },
+        android: { elevation: 4 },
+      }),
     },
-    tabList: {
-      flexWrap: 'wrap',
+    grid: {
       flexDirection: 'row',
-      justifyContent: 'space-evenly',
-      alignContent: 'center',
-      width: width,
-      padding: 12,
-    },
-    tabItem: {
-      alignItems: 'center',
-      width: itemWidth,
-      height: itemWidth,
+      flexWrap: 'wrap',
       justifyContent: 'space-around',
+      paddingHorizontal: 8,
     },
-    serviceSlider: {
-      width: width,
-      height: 150,
-      borderRadius: 20,
+    gridItem: {
+      width: itemWidth,
+      alignItems: 'center',
+      paddingVertical: 12,
+    },
+    gridLabel: {
+      fontSize: 12,
+      color: Color.primaryText,
+      marginTop: 8,
+      textAlign: 'center',
+    },
+    expandIcon: {
+      alignSelf: 'center',
+      marginTop: 8,
+    },
+    bannerContainer: {
       marginVertical: 20,
+      borderRadius: 20,
+      overflow: 'hidden',
     },
-    moreServiceContainer: {
+    banner: {
+      width: '100%',
+      height: 150,
+    },
+    moreServicesCard: {
       backgroundColor: Color.opacityBg,
-      borderBottomLeftRadius: 10,
-      borderBottomRightRadius: 10,
+      borderRadius: 16,
+      overflow: 'hidden',
+      marginTop: 8,
     },
-    headerMoreService: {
+    moreServicesHeader: {
       backgroundColor: Color.lightBg,
-      borderBottomLeftRadius: 8,
-      borderBottomRightRadius: 8,
-      paddingVertical: 10,
+      paddingVertical: 12,
+    },
+    moreServicesTitle: {
+      textAlign: 'center',
+      color: Color.whiteText,
+      fontSize: 16,
+      fontWeight: '600',
+    },
+    footer: {
+      flexDirection: 'row',
+      justifyContent: 'center',
+      alignItems: 'center',
+      marginVertical: 32,
+    },
+    footerText: {
+      fontSize: 13,
+      color: Color.subText,
+      textAlign: 'center',
+      marginRight: 8,
+    },
+    heartIcon: {
+      marginTop: 2,
     },
   });
 
-  return (
-    <SafeAreaView style={styles.safeContainer}>
-      {/* wrapper */}
-      <ScrollView style={styles.container}>
-        {/* header */}
-        <View style={styles.headerInfoWrapper}>
-          <TouchableOpacity onPress={() => navigation.navigate('Account')}>
-            <View style={styles.headerInfoUser}>
-              <View
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: 25,
-                  backgroundColor: '#fff',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginRight: 10,
-                }}
-              >
-                <Icon name="user" size={24} color={Color.lightBg} />
-              </View>
+  if (loading) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text style={styles.loadingText}>Đang tải tài khoản...</Text>
+      </View>
+    );
+  }
 
-              <View style={{ flexDirection: 'column' }}>
-                <Text style={{ marginRight: 12, color: Color.whiteText }}>
-                  Xin chào {user?.firstName}
-                </Text>
-                <Text
-                  style={{
-                    color: Color.whiteText,
-                    fontWeight: 700,
-                    textTransform: 'uppercase',
-                    flex: 1,
-                  }}
-                >
-                  {user?.lastName}
-                </Text>
-              </View>
+  return (
+    <SafeAreaView style={styles.container}>
+      <ScrollView showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <TouchableOpacity
+            style={styles.userInfo}
+            onPress={() => navigation.navigate('Account')}
+          >
+            <View style={styles.avatar}>
+              <Icon name="user" size={24} color={Color.boldBg} />
+            </View>
+            <View>
+              <Text style={styles.greeting}>Xin chào,</Text>
+              <Text style={styles.userName}>
+                {user?.firstName} {user?.lastName}
+              </Text>
             </View>
           </TouchableOpacity>
+          <TouchableOpacity style={styles.notification}>
+            <Icon name="bell" size={24} color={Color.whiteText} />
+          </TouchableOpacity>
+        </View>
 
-          <View style={styles.headerInfoNoti}>
-            <Icon name="bell" size={24} color="#fff" />
+        {/* Account Cards */}
+        <View style={styles.accountSection}>
+          <ScrollView
+            horizontal
+            pagingEnabled
+            showsHorizontalScrollIndicator={false}
+            onMomentumScrollEnd={handleScrollEnd}
+            style={styles.accountScroll}
+          >
+            {activeAccounts.map((acc, index) => (
+              <View
+                key={acc.id}
+                style={[
+                  styles.accountCard,
+                  { width },
+                  currentAccount?.id === acc.id && styles.activeAccountCard,
+                ]}
+              >
+                <Text style={styles.accountNumber}>{acc.accountNumber}</Text>
+                <Text style={styles.accountBalance}>
+                  {acc.balance.toLocaleString('vi-VN')}{' '}
+                  <Text style={styles.currency}>đ</Text>
+                </Text>
+              </View>
+            ))}
+          </ScrollView>
+
+          {/* Action Buttons */}
+          <View style={styles.actionButtons}>
+            {[
+              {
+                icon: 'right-left',
+                label: 'Chuyển tiền',
+                screen: 'TransferFlow',
+              },
+              {
+                icon: 'clock-rotate-left',
+                label: 'Lịch sử',
+                screen: 'TransactionHistory',
+              },
+              { icon: 'qrcode', label: 'QR của tôi', action: () => {} },
+              { icon: 'info', label: 'Thông tin', screen: 'AccountDetail' },
+            ].map((btn, i) => (
+              <TouchableOpacity
+                key={i}
+                style={styles.actionButton}
+                onPress={() =>
+                  btn.screen
+                    ? navigation.navigate(btn.screen as any)
+                    : btn.action?.()
+                }
+              >
+                <View style={styles.actionIcon}>
+                  <Icon name={btn.icon} size={28} color={Color.whiteText} />
+                </View>
+                <Text style={styles.actionLabel}>{btn.label}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
-        {/* content  */}
-        <View style={styles.contentContainer}>
-          {/* Section controller */}
-          <View style={styles.bankAccountListWrapper}>
-            <ScrollView
-              style={styles.bankAccountList}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              onMomentumScrollEnd={handleScrollEnd}
-            >
-              {activeAccounts.map(acc => (
-                <View key={acc.id} style={[styles.bankAccountItem, { width }]}>
-                  <Text style={{ color: Color.whiteText, fontWeight: 700 }}>
-                    {acc.accountNumber}
-                  </Text>
-                  <Text style={{ color: Color.whiteText, fontSize: 20 }}>
-                    {acc.balance} VND
-                  </Text>
-                </View>
+        {/* Services */}
+        <View style={styles.servicesSection}>
+          {/* Static Tabs */}
+          <View style={styles.staticTabsCard}>
+            <View style={styles.grid}>
+              {staticTab.map(tab => (
+                <TouchableOpacity key={tab.id} style={styles.gridItem}>
+                  <Icon name={tab.iconName} size={24} color={tab.color} />
+                  <Text style={styles.gridLabel}>{tab.label}</Text>
+                </TouchableOpacity>
               ))}
-            </ScrollView>
-            <View style={styles.bankAccountItemController}>
-              <TouchableOpacity
-                style={styles.buttonController}
-                activeOpacity={0.7}
-                onPress={() => navigation.navigate('TransferFlow')}
-              >
-                <View style={styles.buttonControllerIcon}>
-                  <Icon name="right-left" size={32} color={Color.whiteText} />
-                </View>
-                <Text style={styles.textController}>Chuyển tiền nội bộ</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.buttonController}
-                activeOpacity={0.7}
-                onPress={() => navigation.navigate('TransactionHistory')}
-              >
-                <View style={styles.buttonControllerIcon}>
-                  <Icon
-                    name="clock-rotate-left"
-                    size={32}
-                    color={Color.whiteText}
-                  />
-                </View>
-                <Text style={styles.textController}>Lịch sử</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.buttonController}
-                activeOpacity={0.7}
-                onPress={() => console.log('TouchableOpacity pressed')}
-              >
-                <View style={styles.buttonControllerIcon}>
-                  <Icon name="qrcode" size={32} color={Color.whiteText} />
-                </View>
-                <Text style={styles.textController}>QR của tôi</Text>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.buttonController}
-                activeOpacity={0.7}
-                onPress={() => navigation.navigate('AccountDetail')}
-              >
-                <View style={styles.buttonControllerIcon}>
-                  <Icon name="info" size={32} color={Color.whiteText} />
-                </View>
-                <Text style={styles.textController}>Thông tin</Text>
-              </TouchableOpacity>
+            </View>
+            <Icon
+              name="angle-down"
+              size={20}
+              color={Color.secondBg}
+              style={styles.expandIcon}
+            />
+          </View>
+
+          {/* Banner */}
+          <View style={styles.bannerContainer}>
+            <Image
+              source={require('../assets/image/banner/Banner.webp')}
+              style={styles.banner}
+              resizeMode="cover"
+            />
+          </View>
+
+          {/* More Services */}
+          <View style={styles.moreServicesCard}>
+            <View style={styles.moreServicesHeader}>
+              <Text style={styles.moreServicesTitle}>Chợ tiện ích</Text>
+            </View>
+            <View style={styles.grid}>
+              {moreServiceTab.map(tab => (
+                <TouchableOpacity key={tab.id} style={styles.gridItem}>
+                  <Icon name={tab.iconName} size={24} color={tab.color} />
+                  <Text style={styles.gridLabel}>{tab.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
           </View>
-          {/* Section static layout */}
-          <View style={styles.serviceContainer}>
-            {/* static tab */}
-            <View style={styles.staticTabContainer}>
-              <View style={styles.tabList}>
-                {staticTab.map(tab => (
-                  <View style={styles.tabItem} key={tab.id}>
-                    <Icon name={tab.iconName} size={18} color={tab.color} />
-                    <Text style={{ textAlign: 'center', fontSize: 12 }}>
-                      {tab.label}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-              <Icon name="angle-down" size={18} color={Color.secondBg} />
-            </View>
-            {/* slider */}
-            <View
-              style={{
-                backgroundColor: Color.opacityBg,
-                borderRadius: 20,
-                marginVertical: 20,
-              }}
-            >
-              <Image
-                source={require('../assets/image/banner/Banner.webp')}
-                style={styles.serviceSlider}
-              />
-            </View>
 
-            {/* more service */}
-            <View style={styles.moreServiceContainer}>
-              <View style={styles.headerMoreService}>
-                <Text style={{ textAlign: 'center', color: Color.whiteText }}>
-                  Chợ tiện ích
-                </Text>
-              </View>
-              <View style={styles.tabList}>
-                {moreServiceTab.map(tab => (
-                  <View style={styles.tabItem} key={tab.id}>
-                    <Icon name={tab.iconName} size={18} color={tab.color} />
-                    <Text style={{ textAlign: 'center', fontSize: 12 }}>
-                      {tab.label}
-                    </Text>
-                  </View>
-                ))}
-              </View>
-            </View>
-            <View
-              style={{ marginBottom: 40, marginTop: 20, flexDirection: 'row' }}
-            >
-              <Text style={{ fontSize: 12, textAlign: 'center', flex: 1 }}>
-                Chúc Bạn một ngày đầy hứng khởi!
-              </Text>
-              <Icon name="heart" size={14} color={Color.boldBg} />
-            </View>
+          {/* Footer */}
+          <View style={styles.footer}>
+            <Text style={styles.footerText}>
+              Chúc Bạn một ngày đầy hứng khởi!
+            </Text>
+            <Icon
+              name="heart"
+              size={16}
+              color={Color.danger}
+              style={styles.heartIcon}
+            />
           </View>
         </View>
       </ScrollView>

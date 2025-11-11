@@ -442,7 +442,7 @@ const groupTransactions = (list: any[]) => {
 
 // === STYLES ===
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff' },
+  container: { flex: 1, backgroundColor: '#fff', paddingTop: 30 },
   loading: { textAlign: 'center', marginTop: 50, color: Color.subText },
 
   // Header

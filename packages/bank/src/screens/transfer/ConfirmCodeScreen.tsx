@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import {
   Alert,
   Modal,
+  Platform,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -27,7 +28,7 @@ import {
   formatNumberWithCommas,
   parseNumberFromFormatted,
 } from '../../utils/formatter';
-import { TextInput } from 'react-native-gesture-handler';
+import { ScrollView, TextInput } from 'react-native-gesture-handler';
 import { remoteStorage } from '../../store/storage/remoteStorage';
 
 type ConfirmCodeScreenNavigationProp = StackNavigationProp<
@@ -91,7 +92,7 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
         amount,
         description: note,
       };
-      dispatch(resetState())
+      dispatch(resetState());
       dispatch(createTransactionRequest(transfer));
       setModalVisible(false);
       navigation.navigate('TransactionStatus');
@@ -116,231 +117,489 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
     setModalVisible(false);
     setPassword('');
   };
+
   const styles = StyleSheet.create({
     container: {
       flex: 1,
-      flexDirection: 'column',
+      backgroundColor: Color.whiteText,
       paddingTop: 30,
     },
+    scrollView: {
+      flex: 1,
+      paddingHorizontal: 16,
+    },
     header: {
-      position: 'relative',
       flexDirection: 'row',
       alignItems: 'center',
-      padding: 20,
-      borderBottomWidth: 0.5,
-      borderColor: Color.boldLine,
+      justifyContent: 'center',
+      paddingVertical: 16,
+      borderBottomWidth: 1,
+      borderColor: Color.lightLine,
+      position: 'relative',
     },
-    title: { fontSize: 18, fontWeight: '600', textAlign: 'center', flex: 1 },
-    btnClose: {
+    headerTitle: {
+      fontSize: 18,
+      fontWeight: '700',
+      color: Color.primaryText,
+      textTransform: 'uppercase',
+    },
+    closeButton: {
       position: 'absolute',
-      right: 12,
+      right: 16,
+      padding: 4,
     },
-    content: {
-      position: 'relative',
-      padding: 8,
-      height: '90%',
+    recipientCard: {
+      backgroundColor: Color.whiteText,
+      borderRadius: 16,
+      padding: 16,
+      marginTop: 16,
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.08,
+          shadowRadius: 8,
+        },
+        android: { elevation: 4 },
+      }),
     },
-    destinationAccountInfo: {
+    sectionLabel: {
+      fontSize: 14,
+      color: Color.subText,
+      fontWeight: '500',
+      marginBottom: 8,
+    },
+    recipientInfo: {
       flexDirection: 'row',
       alignItems: 'center',
-      backgroundColor: Color.opacityBg,
-      padding: 10,
     },
-    btnControllerContainer: {
+    bankIcon: {
+      width: 56,
+      height: 56,
+      borderRadius: 28,
+      backgroundColor: Color.btnBg,
+      justifyContent: 'center',
+      alignItems: 'center',
+
+      borderColor: Color.secondBg,
+      borderWidth: 1,
+    },
+    recipientDetails: {
+      flex: 1,
+      marginLeft: 16,
+    },
+    bankName: {
+      fontSize: 15,
+      color: Color.subText,
+      marginBottom: 2,
+    },
+    accountNumber: {
+      fontSize: 17,
+      fontWeight: '600',
+      color: Color.primaryText,
+      marginBottom: 2,
+    },
+    recipientName: {
+      fontSize: 16,
+      color: Color.primaryText,
+      fontWeight: '500',
+      textTransform: 'uppercase',
+    },
+    amountSection: {
+      marginTop: 24,
+      alignItems: 'center',
+    },
+    amountText: {
+      fontSize: 36,
+      fontWeight: '700',
+      color: Color.primaryText,
+      textAlign: 'center',
+    },
+    currency: {
+      fontSize: 24,
+      fontWeight: '600',
+      color: Color.subText,
+    },
+    noteSection: {
+      marginTop: 24,
+      paddingBottom: 100,
+    },
+    noteText: {
+      fontSize: 18,
+      color: Color.primaryText,
+      lineHeight: 26,
+    },
+    bottomBar: {
       position: 'absolute',
       bottom: 0,
-      flexDirection: 'row',
       left: 0,
       right: 0,
-      justifyContent: 'space-between',
-      paddingHorizontal: 8,
+      flexDirection: 'row',
+      padding: 16,
+      backgroundColor: Color.whiteText,
+      borderTopWidth: 1,
+      borderColor: Color.lightLine,
+      gap: 12,
     },
-    btnAccept: {
-      backgroundColor: Color.boldBg,
-      borderRadius: 30,
-      flex: 0.7,
-      paddingVertical: 10,
+    cancelButton: {
+      flex: 1,
+      backgroundColor: Color.btnBg,
+      paddingVertical: 16,
+      borderRadius: 12,
+      justifyContent: 'center',
     },
-    btnCancel: {
-      backgroundColor: Color.subText,
-      borderRadius: 30,
-      flex: 0.3,
-      paddingVertical: 10,
-      marginRight: 4,
+    cancelButtonText: {
+      color: Color.primaryText,
+      fontSize: 16,
+      fontWeight: '600',
+      textAlign: 'center',
     },
+    confirmButton: {
+      flex: 1.8,
+      backgroundColor: Color.lightBg,
+      paddingVertical: 16,
+      borderRadius: 12,
+      justifyContent: 'center',
+    },
+    confirmButtonText: {
+      color: Color.whiteText,
+      fontSize: 16,
+      fontWeight: '600',
+      textAlign: 'center',
+    },
+
+    // Modal Styles
     modalOverlay: {
       flex: 1,
-      backgroundColor: 'rgba(0,0,0,0.5)',
+      backgroundColor: 'rgba(0, 0, 0, 0.5)',
       justifyContent: 'center',
       alignItems: 'center',
     },
     modalContent: {
-      width: '85%',
+      width: '88%',
       backgroundColor: '#fff',
+      borderRadius: 20,
       padding: 24,
-      borderRadius: 16,
-      elevation: 10,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.25,
-      shadowRadius: 4,
+      alignItems: 'center',
+      ...Platform.select({
+        ios: {
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.2,
+          shadowRadius: 12,
+        },
+        android: { elevation: 12 },
+      }),
+    },
+    modalIcon: {
+      marginBottom: 12,
     },
     modalTitle: {
       fontSize: 20,
-      fontWeight: 'bold',
-      textAlign: 'center',
+      fontWeight: '700',
+      color: Color.primaryText,
       marginBottom: 8,
     },
     modalSubtitle: {
-      fontSize: 14,
-      color: '#666',
+      fontSize: 15,
+      color: Color.subText,
       textAlign: 'center',
       marginBottom: 20,
     },
-    passwordBox: {
+    passwordContainer: {
       flexDirection: 'row',
       alignItems: 'center',
-      borderWidth: 1,
-      borderColor: '#ddd',
-      borderRadius: 12,
-      backgroundColor: '#f9f9f9',
-      paddingHorizontal: 12,
+      borderWidth: 1.5,
+      borderColor: Color.boldLine,
+      borderRadius: 14,
+      backgroundColor: '#fafafa',
+      paddingHorizontal: 16,
+      width: '100%',
     },
     passwordInput: {
       flex: 1,
       fontSize: 18,
-      paddingVertical: 14,
-      color: '#000',
+      paddingVertical: 16,
+      color: Color.primaryText,
     },
-    eyeBtn: { padding: 8 },
+    eyeButton: {
+      padding: 8,
+    },
     errorText: {
-      color: 'red',
-      fontSize: 13,
-      marginTop: 8,
+      color: Color.danger,
+      fontSize: 14,
+      marginTop: 12,
       textAlign: 'center',
     },
-    modalButtons: {
+    modalActions: {
       flexDirection: 'row',
-      justifyContent: 'space-between',
-      marginTop: 20,
+      gap: 12,
+      marginTop: 24,
+      width: '100%',
     },
-    modalBtnCancel: {
+    modalCancelBtn: {
       flex: 1,
-      padding: 14,
       backgroundColor: '#eee',
+      paddingVertical: 16,
       borderRadius: 12,
-      marginRight: 8,
+      justifyContent: 'center',
     },
-    modalBtnConfirm: {
-      flex: 1,
-      padding: 14,
-      backgroundColor: Color.primary,
-      borderRadius: 12,
-      marginLeft: 8,
-    },
-    modalBtnTextCancel: {
+    modalCancelText: {
       color: '#666',
-      textAlign: 'center',
+      fontSize: 16,
       fontWeight: '600',
+      textAlign: 'center',
     },
-    modalBtnTextConfirm: {
-      color: '#fff',
-      textAlign: 'center',
+    modalConfirmBtn: {
+      flex: 1,
+      backgroundColor: Color.lightBg,
+      paddingVertical: 16,
+      borderRadius: 12,
+      justifyContent: 'center',
+    },
+    disabledBtn: {
+      backgroundColor: Color.subText,
+      opacity: 0.6,
+    },
+    modalConfirmText: {
+      color: Color.whiteText,
+      fontSize: 16,
       fontWeight: '600',
+      textAlign: 'center',
+    },
+    loadingContainer: {
+      flex: 1,
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: Color.whiteText,
+    },
+    loadingText: {
+      fontSize: 16,
+      color: Color.subText,
     },
   });
 
   if (loading) return <Text>Đang loading...</Text>;
 
+  // return (
+  //   <SafeAreaView style={styles.container}>
+  //     {/* header */}
+  //     <View style={styles.header}>
+  //       <Text style={styles.title}>Xác nhận chuyển tiền</Text>
+  //       <Icon name="xmark" size={28} style={styles.btnClose} />
+  //     </View>
+  //     {/* content */}
+  //     <View style={styles.content}>
+  //       {/* destination account info */}
+  //       <View>
+  //         <Text style={{ marginBottom: 4, fontSize: 16, color: Color.subText }}>
+  //           Chuyển tới:
+  //         </Text>
+  //         <View style={styles.destinationAccountInfo}>
+  //           <Icon name="building-columns" size={42} />
+  //           <View style={{ marginLeft: 12 }}>
+  //             <Text style={{ marginBottom: 8, fontSize: 18 }}>Bank name</Text>
+  //             <Text style={{ marginBottom: 8, fontSize: 18 }}>
+  //               {destinationAccount?.accountNumber}
+  //             </Text>
+  //             <Text style={{ textTransform: 'uppercase', fontSize: 18 }}>
+  //               {destinationAccount?.user.firstName}{' '}
+  //               {destinationAccount?.user.lastName}
+  //             </Text>
+  //           </View>
+  //         </View>
+  //       </View>
+  //       {/* amount and note */}
+  //       <View style={{ marginTop: 20 }}>
+  //         <View>
+  //           <Text
+  //             style={{ marginBottom: 4, fontSize: 16, color: Color.subText }}
+  //           >
+  //             Số tiền:
+  //           </Text>
+  //           <Text style={{ fontSize: 42, textAlign: 'center' }}>
+  //             {formatNumberWithCommas(amount)}
+  //           </Text>
+  //         </View>
+  //         <View>
+  //           <Text
+  //             style={{ marginBottom: 4, fontSize: 16, color: Color.subText }}
+  //           >
+  //             Nội dung:
+  //           </Text>
+  //           <Text style={{ fontSize: 24 }}>{note}</Text>
+  //         </View>
+  //       </View>
+
+  //       {/* button controller */}
+  //       <View style={styles.btnControllerContainer}>
+  //         <TouchableOpacity
+  //           style={styles.btnCancel}
+  //           onPress={() => {
+  //             navigation.goBack();
+  //           }}
+  //         >
+  //           <Text
+  //             style={{
+  //               color: Color.whiteText,
+  //               fontSize: 16,
+  //               textAlign: 'center',
+  //             }}
+  //           >
+  //             Hủy bỏ
+  //           </Text>
+  //         </TouchableOpacity>
+  //         <TouchableOpacity
+  //           style={styles.btnAccept}
+  //           onPress={() => {
+  //             handleAccept();
+  //           }}
+  //         >
+  //           <Text
+  //             style={{
+  //               color: Color.whiteText,
+  //               fontSize: 16,
+  //               textAlign: 'center',
+  //             }}
+  //           >
+  //             Xác nhận
+  //           </Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     </View>
+  //     <Modal
+  //       visible={modalVisible}
+  //       transparent={true}
+  //       animationType="fade"
+  //       onRequestClose={closeModal}
+  //     >
+  //       <TouchableWithoutFeedback onPress={closeModal}>
+  //         <View style={styles.modalOverlay}>
+  //           <TouchableWithoutFeedback>
+  //             <View style={styles.modalContent}>
+  //               <Text style={styles.modalTitle}>Xác thực giao dịch</Text>
+  //               <Text style={styles.modalSubtitle}>
+  //                 Nhập mật khẩu để tiếp tục
+  //               </Text>
+
+  //               <View style={styles.passwordBox}>
+  //                 <TextInput
+  //                   style={styles.passwordInput}
+  //                   placeholder="Mật khẩu"
+  //                   placeholderTextColor="#aaa"
+  //                   secureTextEntry={!showPassword}
+  //                   value={password}
+  //                   onChangeText={setPassword}
+  //                   autoFocus
+  //                   returnKeyType="done"
+  //                   onSubmitEditing={confirmTransfer}
+  //                 />
+  //                 <TouchableOpacity
+  //                   onPress={() => setShowPassword(!showPassword)}
+  //                   style={styles.eyeBtn}
+  //                 >
+  //                   <Icon
+  //                     name={showPassword ? 'eye-slash' : 'eye'}
+  //                     size={20}
+  //                     color="#666"
+  //                   />
+  //                 </TouchableOpacity>
+  //               </View>
+
+  //               {error ? <Text style={styles.errorText}>Sai mật khẩu vui lòng nhập lại</Text> : null}
+
+  //               <View style={styles.modalButtons}>
+  //                 <TouchableOpacity
+  //                   style={styles.modalBtnCancel}
+  //                   onPress={closeModal}
+  //                 >
+  //                   <Text style={styles.modalBtnTextCancel}>Hủy</Text>
+  //                 </TouchableOpacity>
+  //                 <TouchableOpacity
+  //                   style={styles.modalBtnConfirm}
+  //                   onPress={confirmTransfer}
+  //                 >
+  //                   <Text style={styles.modalBtnTextConfirm}>Xác nhận</Text>
+  //                 </TouchableOpacity>
+  //               </View>
+  //             </View>
+  //           </TouchableWithoutFeedback>
+  //         </View>
+  //       </TouchableWithoutFeedback>
+  //     </Modal>
+  //   </SafeAreaView>
+  // );
+
   return (
     <SafeAreaView style={styles.container}>
-      {/* header */}
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Xác nhận chuyển tiền</Text>
-        <Icon name="xmark" size={28} style={styles.btnClose} />
+        <Text style={styles.headerTitle}>Xác nhận chuyển tiền</Text>
+        <TouchableOpacity
+          style={styles.closeButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Icon name="xmark" size={26} color={Color.primaryText} />
+        </TouchableOpacity>
       </View>
-      {/* content */}
-      <View style={styles.content}>
-        {/* destination account info */}
-        <View>
-          <Text style={{ marginBottom: 4, fontSize: 16, color: Color.subText }}>
-            Chuyển tới:
-          </Text>
-          <View style={styles.destinationAccountInfo}>
-            <Icon name="building-columns" size={42} />
-            <View style={{ marginLeft: 12 }}>
-              <Text style={{ marginBottom: 8, fontSize: 18 }}>Bank name</Text>
-              <Text style={{ marginBottom: 8, fontSize: 18 }}>
+
+      <ScrollView
+        style={styles.scrollView}
+        showsVerticalScrollIndicator={false}
+      >
+        {/* Recipient Card */}
+        <View style={styles.recipientCard}>
+          <Text style={styles.sectionLabel}>Chuyển tới</Text>
+          <View style={styles.recipientInfo}>
+            <View style={styles.bankIcon}>
+              <Icon name="building-columns" size={28} color={Color.secondBg} />
+            </View>
+            <View style={styles.recipientDetails}>
+              <Text style={styles.bankName}>Ngân hàng nội bộ</Text>
+              <Text style={styles.accountNumber}>
                 {destinationAccount?.accountNumber}
               </Text>
-              <Text style={{ textTransform: 'uppercase', fontSize: 18 }}>
+              <Text style={styles.recipientName}>
                 {destinationAccount?.user.firstName}{' '}
                 {destinationAccount?.user.lastName}
               </Text>
             </View>
           </View>
         </View>
-        {/* amount and note */}
-        <View style={{ marginTop: 20 }}>
-          <View>
-            <Text
-              style={{ marginBottom: 4, fontSize: 16, color: Color.subText }}
-            >
-              Số tiền:
-            </Text>
-            <Text style={{ fontSize: 42, textAlign: 'center' }}>
-              {formatNumberWithCommas(amount)}
-            </Text>
-          </View>
-          <View>
-            <Text
-              style={{ marginBottom: 4, fontSize: 16, color: Color.subText }}
-            >
-              Nội dung:
-            </Text>
-            <Text style={{ fontSize: 24 }}>{note}</Text>
-          </View>
+
+        {/* Amount */}
+        <View style={styles.amountSection}>
+          <Text style={styles.sectionLabel}>Số tiền chuyển</Text>
+          <Text style={styles.amountText}>
+            {formatNumberWithCommas(amount)}{' '}
+            <Text style={styles.currency}>đ</Text>
+          </Text>
         </View>
 
-        {/* button controller */}
-        <View style={styles.btnControllerContainer}>
-          <TouchableOpacity
-            style={styles.btnCancel}
-            onPress={() => {
-              navigation.goBack();
-            }}
-          >
-            <Text
-              style={{
-                color: Color.whiteText,
-                fontSize: 16,
-                textAlign: 'center',
-              }}
-            >
-              Hủy bỏ
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.btnAccept}
-            onPress={() => {
-              handleAccept();
-            }}
-          >
-            <Text
-              style={{
-                color: Color.whiteText,
-                fontSize: 16,
-                textAlign: 'center',
-              }}
-            >
-              Xác nhận
-            </Text>
-          </TouchableOpacity>
+        {/* Note */}
+        <View style={styles.noteSection}>
+          <Text style={styles.sectionLabel}>Nội dung chuyển khoản</Text>
+          <Text style={styles.noteText}>{note}</Text>
         </View>
+      </ScrollView>
+
+      {/* Bottom Action Bar */}
+      <View style={styles.bottomBar}>
+        <TouchableOpacity
+          style={styles.cancelButton}
+          onPress={() => navigation.goBack()}
+        >
+          <Text style={styles.cancelButtonText}>Hủy bỏ</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.confirmButton} onPress={handleAccept}>
+          <Text style={styles.confirmButtonText}>Xác nhận</Text>
+        </TouchableOpacity>
       </View>
+
+      {/* Password Modal */}
       <Modal
         visible={modalVisible}
-        transparent={true}
+        transparent
         animationType="fade"
         onRequestClose={closeModal}
       >
@@ -348,15 +607,21 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
           <View style={styles.modalOverlay}>
             <TouchableWithoutFeedback>
               <View style={styles.modalContent}>
+                <Icon
+                  name="lock"
+                  size={32}
+                  color={Color.secondBg}
+                  style={styles.modalIcon}
+                />
                 <Text style={styles.modalTitle}>Xác thực giao dịch</Text>
                 <Text style={styles.modalSubtitle}>
                   Nhập mật khẩu để tiếp tục
                 </Text>
 
-                <View style={styles.passwordBox}>
+                <View style={styles.passwordContainer}>
                   <TextInput
                     style={styles.passwordInput}
-                    placeholder="Mật khẩu"
+                    placeholder="Nhập mật khẩu"
                     placeholderTextColor="#aaa"
                     secureTextEntry={!showPassword}
                     value={password}
@@ -367,7 +632,7 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
                   />
                   <TouchableOpacity
                     onPress={() => setShowPassword(!showPassword)}
-                    style={styles.eyeBtn}
+                    style={styles.eyeButton}
                   >
                     <Icon
                       name={showPassword ? 'eye-slash' : 'eye'}
@@ -377,20 +642,28 @@ const ConfirmCodeScreen = ({ navigation }: ConfirmCodeScreenProps) => {
                   </TouchableOpacity>
                 </View>
 
-                {error ? <Text style={styles.errorText}>Sai mật khẩu vui lòng nhập lại</Text> : null}
+                {error && (
+                  <Text style={styles.errorText}>
+                    Sai mật khẩu, vui lòng thử lại
+                  </Text>
+                )}
 
-                <View style={styles.modalButtons}>
+                <View style={styles.modalActions}>
                   <TouchableOpacity
-                    style={styles.modalBtnCancel}
+                    style={styles.modalCancelBtn}
                     onPress={closeModal}
                   >
-                    <Text style={styles.modalBtnTextCancel}>Hủy</Text>
+                    <Text style={styles.modalCancelText}>Hủy</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={styles.modalBtnConfirm}
+                    style={[
+                      styles.modalConfirmBtn,
+                      (!password || password.length < 4) && styles.disabledBtn,
+                    ]}
                     onPress={confirmTransfer}
+                    disabled={!password || password.length < 4}
                   >
-                    <Text style={styles.modalBtnTextConfirm}>Xác nhận</Text>
+                    <Text style={styles.modalConfirmText}>Xác nhận</Text>
                   </TouchableOpacity>
                 </View>
               </View>
