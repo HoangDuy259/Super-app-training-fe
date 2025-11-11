@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,16 @@ import {
   KeyboardAvoidingView,
   Platform,
   Alert,
+  ImageBackground,
 } from 'react-native';
 import Color from '../../themes/Color';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { RootStackParamsList } from '../../navigation/RootNavigation';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { changePasswordRequest, sendOtpRequest } from '../../saga/auth/authSlice';
+import Icon from 'react-native-vector-icons/FontAwesome6';
+import { RootState } from '../../store/store';
+
 
 type ForgotPasswordScreenNavigationProp = StackNavigationProp<
   RootStackParamsList,
@@ -26,11 +30,12 @@ interface ForgotPasswordScreenProps {
 }
 
 const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
-  const [step, setStep] = useState(1); // 1: nhập email, 2: nhập OTP + mật khẩu mới
+  const [step, setStep] = useState(1);
   const [email, setEmail] = useState('');
-  const [otp, setOtp] = useState('');
+  const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const otpInputs = useRef<(TextInput | null)[]>([]);
 
   const dispatch = useDispatch();
 
@@ -44,7 +49,8 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
   };
 
   const handleChangePassword = () => {
-    if (otp.length !== 6) {
+    const otpCode = otp.join('');
+    if (otpCode.length !== 6) {
       Alert.alert('Lỗi', 'Mã OTP phải có 6 chữ số');
       return;
     }
@@ -56,196 +62,294 @@ const ForgotPasswordScreen = ({ navigation }: ForgotPasswordScreenProps) => {
       Alert.alert('Lỗi', 'Mật khẩu xác nhận không khớp');
       return;
     }
-    const data = {
-      email: email,
-      newPassword: newPassword,
-      otp: otp
-    }
-    // Gọi API đổi mật khẩu ở đây
-    dispatch(changePasswordRequest(data))
-    Alert.alert('', '');
+
+    const data = { email, newPassword, otp: otpCode };
+    dispatch(changePasswordRequest(data));
+    
     Alert.alert(
-        'Thành công',
-        'Đổi mật khẩu thành công!',
-        [
-          {
-            text: 'Xác nhận',
-            style: 'destructive',
-            onPress: () => {
-              navigation.navigate('Login');
-            },
-          },
-        ]
-      );
+      'Thành công',
+      'Đổi mật khẩu thành công!',
+      [{ text: 'Đăng nhập ngay', onPress: () => navigation.navigate('Login') }]
+    );
+  };
+
+  const handleOtpChange = (value: string, index: number) => {
+    const newOtp = [...otp];
+    newOtp[index] = value;
+    setOtp(newOtp);
+
+    if (value && index < 5) {
+      otpInputs.current[index + 1]?.focus();
+    }
   };
 
   const handleBack = () => {
     if (step === 2) {
       setStep(1);
-      setOtp('');
+      setOtp(['', '', '', '', '', '']);
       setNewPassword('');
       setConfirmPassword('');
     }
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={{ flex: 1 }}
-      >
-        <View style={styles.inner}>
-          <Text style={styles.title}>
-            {step === 1 ? 'Quên Mật Khẩu' : 'Xác Thực & Đổi Mật Khẩu'}
-          </Text>
+    <ImageBackground source={require('../../assets/image/background/login-bg.jpg')} style={styles.background} blurRadius={3}>
+      <SafeAreaView style={styles.safeArea}>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.container}
+        >
+          {/* Logo */}
+          <View style={styles.logoContainer}>
+            <View style={styles.logo}>
+              <Icon name="shield-halved" size={44} color={Color.secondBg} />
+            </View>
+            <Text style={styles.appName}>TP BANK</Text>
+          </View>
 
-          {step === 1 ? (
-            // Bước 1: Nhập email
-            <>
-              <Text style={styles.label}>Email của bạn</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Nhập email..."
-                placeholderTextColor={Color.subText}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
+          {/* Progress Bar */}
+          <View style={styles.progressContainer}>
+            <View style={[styles.progressStep, step >= 1 && styles.progressActive]} />
+            <View style={styles.progressLine} />
+            <View style={[styles.progressStep, step >= 2 && styles.progressActive]} />
+          </View>
 
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleSendOTP}
-              >
-                <Text style={styles.primaryButtonText}>Gửi mã xác thực</Text>
-              </TouchableOpacity>
-            </>
-          ) : (
-            // Bước 2: Nhập OTP + Mật khẩu mới
-            <>
-              <Text style={styles.label}>Mã OTP (6 số)</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="000000"
-                placeholderTextColor={Color.subText}
-                value={otp}
-                onChangeText={setOtp}
-                keyboardType="numeric"
-                maxLength={6}
-              />
+          {/* Form Card */}
+          <View style={styles.formCard}>
+            <Text style={styles.title}>
+              {step === 1 ? 'Quên Mật Khẩu' : 'Xác Thực OTP'}
+            </Text>
 
-              <Text style={styles.label}>Mật khẩu mới</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Ít nhất 6 ký tự"
-                placeholderTextColor={Color.subText}
-                value={newPassword}
-                onChangeText={setNewPassword}
-                secureTextEntry
-              />
+            {step === 1 ? (
+              <>
+                <Text style={styles.label}>Email của bạn</Text>
+                <View style={styles.inputWrapper}>
+                  <Icon name="envelope" size={20} color={Color.subText} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="nhap@email.com"
+                    placeholderTextColor={Color.subText}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                  />
+                </View>
 
-              <Text style={styles.label}>Nhập lại mật khẩu</Text>
-              <TextInput
-                style={styles.input}
-                placeholder="Xác nhận mật khẩu"
-                placeholderTextColor={Color.subText}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-              />
-
-              <View style={styles.buttonRow}>
-                <TouchableOpacity
-                  style={styles.cancelButton}
-                  onPress={handleBack}
-                >
-                  <Text style={styles.cancelButtonText}>Hủy</Text>
+                <TouchableOpacity style={styles.primaryButton} onPress={handleSendOTP}>
+                  <Text style={styles.primaryButtonText}>
+                    Gửi mã OTP
+                  </Text>
                 </TouchableOpacity>
+              </>
+            ) : (
+              <>
+                {/* OTP Input */}
+                <Text style={styles.label}>Nhập mã OTP (6 số)</Text>
+                <View style={styles.otpContainer}>
+                  {otp.map((digit, index) => (
+                    <TextInput
+                      key={index}
+                      ref={ref => (otpInputs.current[index] = ref as any)}
+                      style={styles.otpBox}
+                      value={digit}
+                      onChangeText={(value) => handleOtpChange(value, index)}
+                      keyboardType="numeric"
+                      maxLength={1}
+                      textAlign="center"
+                    />
+                  ))}
+                </View>
 
-                <TouchableOpacity
-                  style={styles.primaryButton}
-                  onPress={handleChangePassword}
-                >
-                  <Text style={styles.primaryButtonText}>Đổi mật khẩu</Text>
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
+                {/* New Password */}
+                <Text style={styles.label}>Mật khẩu mới</Text>
+                <View style={styles.inputWrapper}>
+                  <Icon name="lock" size={20} color={Color.subText} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Ít nhất 6 ký tự"
+                    placeholderTextColor={Color.subText}
+                    value={newPassword}
+                    onChangeText={setNewPassword}
+                    secureTextEntry
+                  />
+                </View>
 
-          {step === 1 && (
+                {/* Confirm Password */}
+                <Text style={styles.label}>Xác nhận mật khẩu</Text>
+                <View style={styles.inputWrapper}>
+                  <Icon name="lock" size={20} color={Color.subText} style={styles.inputIcon} />
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Nhập lại mật khẩu"
+                    placeholderTextColor={Color.subText}
+                    value={confirmPassword}
+                    onChangeText={setConfirmPassword}
+                    secureTextEntry
+                  />
+                </View>
+
+                <View style={styles.buttonRow}>
+                  <TouchableOpacity style={styles.cancelButton} onPress={handleBack}>
+                    <Text style={styles.cancelButtonText}>Hủy</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={styles.primaryButton} onPress={handleChangePassword}>
+                    <Text style={styles.primaryButtonText}>
+                      Đổi mật khẩu
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+
+            {/* Back to Login */}
             <TouchableOpacity
               style={styles.backLink}
-              onPress={() => navigation.goBack()}
+              onPress={() => navigation.navigate('Login')}
             >
-              <Text style={styles.backText}>← Quay lại đăng nhập</Text>
+              <Icon name="arrow-left" size={16} color={Color.whiteText} />
+              <Text style={styles.backText}> Quay lại đăng nhập</Text>
             </TouchableOpacity>
-          )}
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    width: '100%',
+    height: '100%',
+  },
+  safeArea: {
+    flex: 1,
+  },
   container: {
     flex: 1,
-    backgroundColor: Color.modalBg,
-  },
-  inner: {
-    flex: 1,
-    padding: 24,
     justifyContent: 'center',
+    paddingHorizontal: 24,
   },
-  title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: Color.primaryText,
-    textAlign: 'center',
+  logoContainer: {
+    alignItems: 'center',
+    marginBottom: 24,
+  },
+  logo: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+    ...Platform.select({
+      ios: { shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.2, shadowRadius: 12 },
+      android: { elevation: 8 },
+    }),
+  },
+  appName: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: Color.whiteText,
+    letterSpacing: 1,
+  },
+  progressContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 32,
   },
+  progressStep: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+  },
+  progressActive: {
+    backgroundColor: Color.secondBg,
+  },
+  progressLine: {
+    width: 60,
+    height: 2,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    marginHorizontal: 8,
+  },
+  formCard: {
+    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+    borderRadius: 20,
+    padding: 24,
+  },
+  title: {
+    fontSize: 24,
+    fontWeight: '700',
+    color: Color.whiteText,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
   label: {
-    fontSize: 16,
-    color: Color.primaryText,
+    fontSize: 15,
+    color: Color.whiteText,
     marginBottom: 8,
     fontWeight: '600',
   },
-  input: {
-    height: 52,
-    borderWidth: 1,
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.5,
     borderColor: Color.lightLine,
-    borderRadius: 12,
+    borderRadius: 14,
     paddingHorizontal: 16,
-    fontSize: 16,
-    backgroundColor: '#fff',
     marginBottom: 16,
+    backgroundColor: '#fafafa',
+  },
+  inputIcon: {
+    marginRight: 12,
+  },
+  input: {
+    flex: 1,
+    fontSize: 16,
+    paddingVertical: 14,
     color: Color.primaryText,
   },
-  primaryButton: {
-    backgroundColor: Color.boldBg,
-    height: 52,
+  otpContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 20,
+  },
+  otpBox: {
+    width: 48,
+    height: 56,
+    borderWidth: 1.5,
+    borderColor: Color.lightLine,
     borderRadius: 12,
+    textAlign: 'center',
+    fontSize: 20,
+    fontWeight: '600',
+    backgroundColor: '#fff',
+  },
+  primaryButton: {
+    flex: 1,
+    backgroundColor: Color.lightBg,
+    borderRadius: 14,
     justifyContent: 'center',
-    alignItems: 'center',
-    paddingHorizontal: 8
+    alignItems: 'center'
   },
   primaryButtonText: {
-    color: '#fff',
+    color: Color.whiteText,
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: '700'
   },
   buttonRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 16,
     gap: 12,
-    alignItems: 'center'
+    marginTop: 8,
   },
   cancelButton: {
     flex: 1,
     backgroundColor: Color.btnBg,
-    height: 52,
-    borderRadius: 12,
-    justifyContent: 'center',
+    paddingVertical: 16,
+    borderRadius: 14,
     alignItems: 'center',
     borderWidth: 1,
     borderColor: Color.lightLine,
@@ -256,13 +360,16 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   backLink: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     marginTop: 24,
-    alignSelf: 'center',
   },
   backText: {
-    color: Color.highlightText,
+    color: Color.whiteText,
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '600',
+    marginLeft: 4,
   },
 });
 

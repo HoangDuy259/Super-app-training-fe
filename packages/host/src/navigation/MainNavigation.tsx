@@ -5,6 +5,7 @@ import Icon from 'react-native-vector-icons/FontAwesome6';
 import StockScreen from '../screens/StockScreen';
 import BankScreen from '../screens/bank/BankScreen';
 import AccountScreen from '../../../bank/src/screens/account/AccountScreen'
+import { getFocusedRouteNameFromRoute } from '@react-navigation/native';
 
 export type MainTabParamsList = {
   Home: undefined;
@@ -33,6 +34,29 @@ const MainNavigation = () => {
             <Icon name="house" size={16} color={focused ? '#ff9900' : '#666'} />
           ),
         }}
+        // options={({ route }) => {
+        //   const routeName = getFocusedRouteNameFromRoute(route) ?? '';
+
+        //   // Danh sách các màn trong TransferFlow cần ẨN TAB
+        //   const hideTabRoutes = [
+        //     'FindDestinationAccount',
+        //     'ConfirmCode',
+        //     'TransactionStatus',
+        //   ];
+
+        //   const shouldHideTab = hideTabRoutes.some(name =>
+        //     routeName.startsWith(name)
+        //   );
+
+        //   return {
+        //     tabBarLabel: 'Trang chủ',
+        //     tabBarIcon: ({ focused }) => (
+        //       <Icon name="house" size={16} color={focused ? '#ff9900' : '#666'} />
+        //     ),
+        //     // ẨN TAB KHI VÀO TRANSFER FLOW
+        //     tabBarStyle: shouldHideTab ? { display: 'none' } : undefined,
+        //   };
+        // }}
       />
       <Tab.Screen
         name="Stock"

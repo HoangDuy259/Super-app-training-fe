@@ -6,7 +6,7 @@ class EventBus {
   on<T = any>(event: string, callback: EventCallback<T>) {
     if (!this.listeners[event]) this.listeners[event] = [];
     this.listeners[event].push(callback);
-    return () => this.off(event, callback); // return unsub function
+    return () => this.off(event, callback);
   }
 
   off<T = any>(event: string, callback: EventCallback<T>) {

@@ -20,7 +20,7 @@ import { AccountStackParamsList, BankStackParamsList } from '../../navigation/ba
 import { StackNavigationProp } from '@react-navigation/stack';
 
 type ChangePasswordScreenNavigationProp = StackNavigationProp<
-  AccountStackParamsList,
+  BankStackParamsList,
   'ChangePassword'
 >;
 
@@ -188,6 +188,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#fff',
+    paddingTop: 6
   },
   inner: {
     flex: 1,
@@ -212,6 +213,7 @@ const styles = StyleSheet.create({
   },
   form: {
     flex: 1,
+    marginTop: 12
   },
   label: {
     fontSize: 15,
@@ -239,7 +241,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
   changeButton: {
-    backgroundColor: Color.primary,
+    backgroundColor: Color.lightBg,
     height: 52,
     borderRadius: 12,
     justifyContent: 'center',

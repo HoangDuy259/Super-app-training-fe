@@ -10,8 +10,7 @@ const Stack = createStackNavigator<TransferStackParamsList>();
 
 export default function TransferNavigator() {
   return (
-    <Stack.Navigator screenOptions={{ headerShown: false }}>
-      {/* <Stack.Screen name="ChooseBank" component={ChooseBankScreen} /> */}
+    <Stack.Navigator screenOptions={{ headerShown: false }} >
       <Stack.Screen name="FindDestinationAccount" component={FindDestinationAccountScreen} />
       <Stack.Screen name="ConfirmCode" component={ConfirmCodeScreen} />
       <Stack.Screen
